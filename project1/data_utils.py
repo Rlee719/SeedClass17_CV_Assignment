@@ -4,12 +4,16 @@ import os
 
 def load_CIFAR_batch(filename):
   with open(filename, 'rb') as f:
+    #print(filename)
     datadict = pickle.load(f, encoding='bytes')
-    X = datadict['data']
-    Y = datadict['labels']
+    print(datadict.keys())
+    X = datadict[b'data']
+    Y = datadict[b'labels']
     X = X.reshape(10000, 3, 32, 32).transpose(0, 2, 3, 1).astype("float")
     Y = np.array(Y)
     return X, Y
+
+
 
 def load_CIFAR10(ROOT):
   xs = []
