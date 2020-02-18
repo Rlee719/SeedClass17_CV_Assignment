@@ -1,5 +1,5 @@
 # Code for CV Assignment of SeedClass_17
-***[Rlee719](https://github.com/Rlee719), [RyuGuo](https://github.com/RyuGuo), [Skylyyun](https://github.com/RyuGuo)***
+***[Rlee719](https://github.com/Rlee719), [RyuGuo](https://github.com/RyuGuo), [Skylyyun](https://github.com/Skylyyun)***
 ## Project 1: Building an image classifier on Cifar10 dataset using image features and classifiers
 
 - [ ] Cifar10 https://www.cs.toronto.edu/~kriz/cifar.html, 50000 training images and 10000 test images. 
