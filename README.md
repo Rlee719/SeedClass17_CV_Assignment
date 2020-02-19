@@ -7,3 +7,5 @@
 - [ ] Using kNN classifier
 - [ ] Determine the best k & distance metric
 - [ ] Due in the next work: source code, slides and oral presentation
+
+把 cifar-10-batches-py 放置在 project1 目录。
