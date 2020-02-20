@@ -28,7 +28,7 @@ class KNearestNeighbor(object):
 
   def predict_labels(self, dists, k=1):
     num_test = dists.shape[0]
-    y_pred = np.zeros(num_test)
+    y_pred = np.zeros(num_test, dtype="uint8")
     for i in range(num_test):
       # 排序选择最小 k 个
       closest_y = self.y_train[np.argsort(dists[i])][:k]
