@@ -2,3 +2,6 @@
 /project1/cifar-10-python.tar.gz
 /project1/__pycache__/
 /project1/train_result*
+.DS_Store
+
+.idea/
