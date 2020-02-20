@@ -70,8 +70,8 @@ def run_test(best_k, best_m):
 
 def cro_val_plot(k_choices, k_to_accuracies):
     for dist_m in k_to_accuracies:
-        for k in k_choices:
-            accuracies = k_to_accuracies[dist_m][k]
+        # for k in k_choices:
+            # accuracies = k_to_accuracies[dist_m][k]
             # plt.scatter 显示所有散点
             # plt.scatter([k] * len(accuracies), accuracies)
 
@@ -82,7 +82,9 @@ def cro_val_plot(k_choices, k_to_accuracies):
         plt.title('Cross-validation on k for dist metric %s' % dist_m)
         plt.xlabel('k')
         plt.ylabel('Cross-von accuracy')
-        plt.show()
+        plt.savefig('Cross-validation-dist-metric-' + dist_m)
+        plt.cla()
+        # plt.show()
 
 
 ################################################################################
@@ -95,10 +97,10 @@ def cro_val_plot(k_choices, k_to_accuracies):
 k_choices = [x for x in range(1, 101)]
 start = time.time()
 print("Running Train Set ...")
-k_to_accuracies = cross_validation(10, k_choices, ['L1', 'L2'])
+k_to_accuracies = cross_validation(10, k_choices, ['L1','L2','L3'])
 print("Execution Train Time: ", time.time() - start, "s")
 
-# 绘cross_validation图
+# 绘制 cross_validation 曲线图
 cro_val_plot(k_choices, k_to_accuracies)
 
 # 保存训练结果
