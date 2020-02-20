@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.spatial
 
 class KNearestNeighbor(object):
 
@@ -22,6 +23,10 @@ class KNearestNeighbor(object):
         dists[i] = np.sum(np.abs(X[i] - self.X_train), axis=1)
     elif dist_m == 'L2':
       dists = np.sqrt((X**2).sum(axis=1, keepdims=True) + (self.X_train**2).sum(axis=1) - 2 * X.dot(self.X_train.T))
+    elif dist_m == 'L3':
+      for i in range(num_test):
+        for j in range(num_train):
+          dists[i, j] = scipy.spatial.distance.cosine(X[i], self.X_train[j])
     else:
       print('Invalid value %s for dist_m' % dist_m)
     return self.predict_labels(dists, k)
