@@ -1,6 +1,7 @@
 import pickle
-import numpy as np
 import os
+import numpy as np
+import random
 
 def load_CIFAR_batch(filename):
   with open(filename, 'rb') as f:
@@ -27,3 +28,18 @@ def load_CIFAR10(ROOT):
   del X, Y
   Xte, Yte = load_CIFAR_batch(os.path.join(ROOT, 'test_batch'))
   return Xtr, Ytr, Xte, Yte
+
+def extract_CIFAR10_samples(X, Y, nums):
+  if len(X) != len(Y):
+    print("X and Y must have the same length! (X: %d, Y: %d)" % (len(X), len(Y)))
+    return
+  r = [x for x in range(len(X))]
+  random.shuffle(r)
+  r = r[:int(nums)]
+  _X = []
+  _Y = []
+  for i in r:
+    _X.append(X[i])
+    _Y.append(Y[i])
+  return np.array(_X), np.array(_Y)
+  

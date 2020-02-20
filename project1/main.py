@@ -1,25 +1,24 @@
 import numpy as np
-from data_utils import load_CIFAR10
+from data_utils import load_CIFAR10, extract_CIFAR10_samples
 from knn import KNearestNeighbor
 import time
-import os
 
 # 加载数据集
 cifar10_dir = 'cifar-10-batches-py'
 X_train, y_train, X_test, y_test = load_CIFAR10(cifar10_dir)
 
-print('Training data shape: {}'.format(X_train.shape))
-print('Training labels shape: {}'.format(y_train.shape))
-print('Test data shape: {}'.format(X_test.shape))
-print('Test labels shape: {}'.format(y_test.shape))
-
 # 将单幅图片转成 3072 维的向量
 X_train = np.reshape(X_train, (X_train.shape[0], -1))
 X_test = np.reshape(X_test, (X_test.shape[0], -1))
 
-# TODO: 根据课程需要，将训练集缩小为 1/5
-X_train = X_train[:1000]
-y_train = y_train[:1000]
+# 根据课程需要，将训练集缩小为 1/5
+
+X_train, y_train = extract_CIFAR10_samples(X_train, y_train, X_train.shape[0] / 5)
+
+print('Training data shape: {}'.format(X_train.shape))
+print('Training labels shape: {}'.format(y_train.shape))
+print('Test data shape: {}'.format(X_test.shape))
+print('Test labels shape: {}'.format(y_test.shape))
 
 def cross_validation(num_folds, k_choices, m_choices):
   num_test = X_train.shape[0] / num_folds
@@ -29,7 +28,9 @@ def cross_validation(num_folds, k_choices, m_choices):
   y_train_folds = np.array(np.array_split(y_train, num_folds))
 
   # 保存不同 k 的结果
-  k_to_accuracies = {'L1':{}, 'L2':{}}
+  k_to_accuracies = dict.fromkeys(m_choices)
+  for m in k_to_accuracies:
+    k_to_accuracies[m] = {}
 
   # 交叉验证核心运行代码
   for dist_m in m_choices:
@@ -50,13 +51,13 @@ def cross_validation(num_folds, k_choices, m_choices):
   return k_to_accuracies
 
 
-def run_test(k_best, m_best):
+def run_test(best_k, best_m):
   # 选择最好的 k 值，在测试集中测试
   num_test = X_test.shape[0]
   classifier = KNearestNeighbor()
   classifier.train(X_train, y_train)
 
-  y_test_pred = classifier.predict(X_test, k=k_best, dist_m=m_best)
+  y_test_pred = classifier.predict(X_test, k=best_k, dist_m=best_m)
 
   num_correct = np.sum(y_test_pred == y_test)
   accuracy = float(num_correct) / num_test
@@ -72,21 +73,34 @@ def run_test(k_best, m_best):
 
 # 运行训练
 start = time.time()
-k_to_accuracies = cross_validation(10, [1, 3, 5, 8, 10, 12, 15, 20, 50, 100], ['L1', 'L2'])
-print("Execution Training Time: ", time.time() - start)
+print("Running Train Set ...")
+k_to_accuracies = cross_validation(10, [x for x in range(1, 101)], ['L1', 'L2'])
+print("Execution Train Time: ", time.time() - start, "s")
 
-# 保存文件
+# 保存训练结果
 myfile = open("train_result.txt", "w")
 myfile.write(str(k_to_accuracies))
 myfile.close()
 
-# 将所有 k 的取值结果打印
-# for k in sorted(k_to_accuracies):
-#     for accuracy in k_to_accuracies[k]:
-#         print('k = %d, accuracy = %f' % (k, accuracy))
-#     print('mean for k=%d is %f' % (k, np.mean(k_to_accuracies[k])))
+# 将所有 k 的取值结果打印，得到最佳超参数
+myfile = open("train_result_mean.txt", "w")
+best_k = 1
+best_m = "L1"
+best_acc = 0
+for dist_m in k_to_accuracies:
+  for k in sorted(k_to_accuracies[dist_m]):
+    mean = np.mean(k_to_accuracies[dist_m][k])
+    print("dist metric %s mean for k=%d is %f" % (dist_m, k, mean))
+    myfile.writelines("%s %d %f\n" % (dist_m, k, mean))
+    if mean > best_acc:
+      best_k = k
+      best_acc = mean
+      best_m = dist_m
+myfile.close()
+print("Best Distance Metric is %s, Best k is %d, Best Train Acc is %f" % (best_m, best_k, best_acc))
 
 # 运行测试
 start = time.time()
-run_test(10, "L2")
-print("Execution Testing Time: ", time.time() - start)
+print("Running Test Set ...")
+run_test(best_k, best_m)
+print("Execution Test Time: ", time.time() - start, "s")
