@@ -35,6 +35,6 @@ def histogram(cell, bin_num):
 if __name__ == "__main__":
     #X_train, y_train, X_test, y_test = load_CIFAR10('cifar-10-batches-py')
     #np.save("img", X_train[300])
-    test_img = np.load("img.npy")
+    test_img = np.load("test_npy/img0.npy")
     hog_extractor(test_img, cell_size=4, bin_num=12)
     pass

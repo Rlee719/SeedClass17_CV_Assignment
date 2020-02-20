@@ -43,3 +43,10 @@ def extract_CIFAR10_samples(X, Y, nums):
     _Y.append(Y[i])
   return np.array(_X), np.array(_Y)
   
+def generate_test_npy():
+    X_train, y_train, X_test, y_test = load_CIFAR10('cifar-10-batches-py')
+    for i in range(50):
+        np.save("test_npy/img"+str(i), X_train[i+10])
+
+if __name__ == "__main__":
+    generate_test_npy()
