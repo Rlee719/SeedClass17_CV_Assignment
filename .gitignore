@@ -1,5 +1,6 @@
 /project1/cifar-10-batches-py/
 /project1/cifar-10-python.tar.gz
-/project1/__pycache__/*
-/project1/train_result
+
+/project1/__pycache__/
 /project1/test.py
+/project1/train_result/
