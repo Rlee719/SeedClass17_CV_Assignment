@@ -4,25 +4,51 @@ from knn import KNearestNeighbor
 import time
 import matplotlib.pyplot as plt
 
-# 加载数据集
-cifar10_dir = 'cifar-10-batches-py'
-X_train, y_train, X_test, y_test = load_CIFAR10(cifar10_dir)
+def load_data_set():
+    # 加载数据集
+    cifar10_dir = 'cifar-10-batches-py'
+    X_train, y_train, X_test, y_test = load_CIFAR10(cifar10_dir)
 
-# 将单幅图片转成 3072 维的向量
-X_train = np.reshape(X_train, (X_train.shape[0], -1))
-X_test = np.reshape(X_test, (X_test.shape[0], -1))
+    # 将单幅图片转成 3072 维的向量
+    X_train = np.reshape(X_train, (X_train.shape[0], -1))
+    X_test = np.reshape(X_test, (X_test.shape[0], -1))
 
-# 根据课程需要，将训练集缩小为 1/5
+    # 根据课程需要，将训练集缩小为 1/5
 
-X_train, y_train = extract_CIFAR10_samples(X_train, y_train, X_train.shape[0] / 5)
+    X_train, y_train = extract_CIFAR10_samples(X_train, y_train, X_train.shape[0] / 5)
 
-print('Training data shape: {}'.format(X_train.shape))
-print('Training labels shape: {}'.format(y_train.shape))
-print('Test data shape: {}'.format(X_test.shape))
-print('Test labels shape: {}'.format(y_test.shape))
+    return X_train, y_train, X_test, y_test
 
 
-def cross_validation(num_folds, k_choices, m_choices):
+def get_best_hyperpramamter(k_to_accuracies, filename=""):
+    if filename != '':
+        myfile = open(filename, "w")
+    best_k = 1
+    best_m = "L1"
+    best_acc = 0
+    for dist_m in k_to_accuracies:
+        for k in sorted(k_to_accuracies[dist_m]):
+            mean = np.mean(k_to_accuracies[dist_m][k])
+            print("dist metric %s mean for k=%d is %f" % (dist_m, k, mean))
+            if filename != '':
+                myfile.writelines("%s %d %f\n" % (dist_m, k, mean))
+            if mean > best_acc:
+                best_k = k
+                best_acc = mean
+                best_m = dist_m
+    if filename != '':
+        myfile.close()
+    print("Best Distance Metric is %s, Best k is %d, Best Train Acc is %f" % (best_m, best_k, best_acc))
+    return best_k, best_m
+
+
+def save_dict_to_file(dict, filename):
+    myfile = open(filename, "w")
+    myfile.write(str(dict))
+    myfile.close()
+
+
+def cross_validation(X_train, y_train, num_folds, k_choices, m_choices):
     num_test = X_train.shape[0] / num_folds
 
     # 将训练集分成 num_folds 份
@@ -54,7 +80,7 @@ def cross_validation(num_folds, k_choices, m_choices):
     return k_to_accuracies
 
 
-def run_test(best_k, best_m):
+def run_test(best_k, best_m, X_train, y_train, X_test, y_test):
     # 选择最好的 k 值，在测试集中测试
     num_test = X_test.shape[0]
     classifier = KNearestNeighbor()
@@ -70,11 +96,6 @@ def run_test(best_k, best_m):
 
 def cro_val_plot(k_choices, k_to_accuracies):
     for dist_m in k_to_accuracies:
-        # for k in k_choices:
-            # accuracies = k_to_accuracies[dist_m][k]
-            # plt.scatter 显示所有散点
-            # plt.scatter([k] * len(accuracies), accuracies)
-
         # plot the trend line with error bars that correspond to standard deviation
         accuracies_mean = np.array([np.mean(v) for k, v in sorted(k_to_accuracies[dist_m].items())])
         accuracies_std = np.array([np.std(v) for k, v in sorted(k_to_accuracies[dist_m].items())])
@@ -93,40 +114,31 @@ def cro_val_plot(k_choices, k_to_accuracies):
 #                                                                              #
 ################################################################################
 
-# 运行训练
-k_choices = [x for x in range(1, 101)]
-start = time.time()
-print("Running Train Set ...")
-k_to_accuracies = cross_validation(10, k_choices, ['L1','L2','L3'])
-print("Execution Train Time: ", time.time() - start, "s")
+if __name__ == "__main__":
+    X_train, y_train, X_test, y_test = load_data_set()
+    print('Training data shape: {}'.format(X_train.shape))
+    print('Training labels shape: {}'.format(y_train.shape))
+    print('Test data shape: {}'.format(X_test.shape))
+    print('Test labels shape: {}'.format(y_test.shape))
 
-# 绘制 cross_validation 曲线图
-cro_val_plot(k_choices, k_to_accuracies)
+    # 运行训练
+    k_choices = [x for x in range(1, 101)]
+    start = time.time()
+    print("Running Train Set ...")
+    k_to_accuracies = cross_validation(X_train, y_train, 10, k_choices, ['L1','L2','L3'])
+    print("Execution Train Time: ", time.time() - start, "s")
 
-# 保存训练结果
-myfile = open("train_result.txt", "w")
-myfile.write(str(k_to_accuracies))
-myfile.close()
+    # 绘制 cross_validation 曲线图
+    cro_val_plot(k_choices, k_to_accuracies)
 
-# 将所有 k 的取值结果打印，得到最佳超参数
-myfile = open("train_result_mean.txt", "w")
-best_k = 1
-best_m = "L1"
-best_acc = 0
-for dist_m in k_to_accuracies:
-    for k in sorted(k_to_accuracies[dist_m]):
-        mean = np.mean(k_to_accuracies[dist_m][k])
-        print("dist metric %s mean for k=%d is %f" % (dist_m, k, mean))
-        myfile.writelines("%s %d %f\n" % (dist_m, k, mean))
-        if mean > best_acc:
-            best_k = k
-            best_acc = mean
-            best_m = dist_m
-myfile.close()
-print("Best Distance Metric is %s, Best k is %d, Best Train Acc is %f" % (best_m, best_k, best_acc))
+    # 保存训练结果
+    save_dict_to_file(k_to_accuracies, "train_result.txt")
 
-# 运行测试
-start = time.time()
-print("Running Test Set ...")
-run_test(best_k, best_m)
-print("Execution Test Time: ", time.time() - start, "s")
+    # 将所有 k 的取值结果打印，得到最佳超参数
+    best_k, best_m = get_best_hyperpramamter(k_to_accuracies, "train_result_mean.txt")
+
+    # 运行测试
+    start = time.time()
+    print("Running Test Set ...")
+    run_test(best_k, best_m, X_train, y_train, X_test, y_test)
+    print("Execution Test Time: ", time.time() - start, "s")
