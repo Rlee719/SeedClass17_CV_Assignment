@@ -10,7 +10,7 @@ class KNearestNeighbor(object):
   def train(self, X, y):
     # X 是训练集 图片数据
     # y 是训练集 标签
-    self.X_train = X
+    self.X_train = X.astype(np.int64)
     self.y_train = y
 
 
@@ -23,14 +23,10 @@ class KNearestNeighbor(object):
         dists[i] = np.sum(np.abs(X[i] - self.X_train), axis=1)
     elif dist_m == 'L2':
       X = X.astype(np.int64)
-      self.X_train = self.X_train.astype(np.int64)
       dists = np.sqrt((X**2).sum(axis=1, keepdims=True) + (self.X_train**2).sum(axis=1) - 2 * X.dot(self.X_train.T))
     elif dist_m == 'cosine':
       X = X.astype(np.int64)
-      self.X_train = self.X_train.astype(np.int64)
-      for i in range(num_test):
-        for j in range(num_train):
-          dists[i, j] = scipy.spatial.distance.cosine(X[i], self.X_train[j])
+      dists = 1 - X.dot(self.X_train.T) / np.sqrt(np.sum(X**2, axis=1,keepdims=True) * np.sum(self.X_train**2,axis=1).T)
     else:
       print('Invalid value %s for dist_m' % dist_m)
     return dists

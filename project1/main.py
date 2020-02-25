@@ -133,7 +133,6 @@ def cro_val_plot(k_choices, k_to_accuracies, k_to_accuracies_hog):
            fancybox=True)
         plt.savefig('Cross-validation-dist-metric-' + dist_m)
         plt.cla()
-        # plt.show()
 
 
 ################################################################################
@@ -144,7 +143,7 @@ def cro_val_plot(k_choices, k_to_accuracies, k_to_accuracies_hog):
 
 if __name__ == "__main__":
     generate_hog_data()
-    #sys.exit()
+
     X_train, y_train, X_test, y_test = load_data_set()
     X_hog_train, X_hog_test, y_hog_train, y_hog_test = load_hog_data()
 
@@ -152,19 +151,23 @@ if __name__ == "__main__":
     num_folds = 5
     k_choices = [x for x in range(1, 100)]
     start = time.time()
+    print("Running Training Set ...")
     k_to_accuracies = cross_validation(X_train, y_train, num_folds, k_choices, ['L1','L2','cosine'])
     k_to_accuracies_hog = cross_validation(X_hog_train, y_hog_train, num_folds, k_choices, ['L1','L2','cosine'])
+    print("Execution Training Time: ", time.time() - start, "s")
 
     # 保存训练结果
     save_dict_to_file(k_to_accuracies, "train_result.txt")
     save_dict_to_file(k_to_accuracies_hog, "train_result_hog.txt")
 
+    # 绘制图像
     cro_val_plot(k_choices, k_to_accuracies, k_to_accuracies_hog)
 
     # 将所有 k 的取值结果打印，得到最佳超参数
     best_k, best_m = get_best_hyperpramamter(k_to_accuracies, "train_result_mean.txt")
     best_k_hog, best_m_hog = get_best_hyperpramamter(k_to_accuracies_hog, "train_result_mean.txt")
     print("best_k={}, best_m={}, best_k_hog={}, best_m_hog={}".format(best_k, best_m, best_k_hog, best_m_hog))
+
     # 运行测试
     start = time.time()
     print("Running Test Set ...")
