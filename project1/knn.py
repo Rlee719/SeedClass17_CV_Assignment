@@ -22,8 +22,12 @@ class KNearestNeighbor(object):
       for i in range(num_test):
         dists[i] = np.sum(np.abs(X[i] - self.X_train), axis=1)
     elif dist_m == 'L2':
+      X = X.astype(np.int64)
+      self.X_train = self.X_train.astype(np.int64)
       dists = np.sqrt((X**2).sum(axis=1, keepdims=True) + (self.X_train**2).sum(axis=1) - 2 * X.dot(self.X_train.T))
-    elif dist_m == 'L3':
+    elif dist_m == 'cosine':
+      X = X.astype(np.int64)
+      self.X_train = self.X_train.astype(np.int64)
       for i in range(num_test):
         for j in range(num_train):
           dists[i, j] = scipy.spatial.distance.cosine(X[i], self.X_train[j])
