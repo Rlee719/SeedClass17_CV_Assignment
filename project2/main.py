@@ -28,9 +28,7 @@ class softmax():
         for i in range(self.layer_num):
             self.layers[i] = np.dot(cache, self.w[i]) + self.b[i]
             cache = self.layers[i]
-        output = self.softmax(self.layers[-1])
-        outputs.append(output)
-        outputs = np.array(outputs).squeeze(0)
+        outputs = self.softmax(self.layers[-1])
         return outputs
 
     def train(self, x, y, batch_size, epoch, lr, reg):   
@@ -62,7 +60,8 @@ class softmax():
 
 if __name__ == "__main__":
     X_train, X_test, y_train, y_test = data_utils.load_npy()
-    softmax_classifier = softmax([3072,10]) #这句参数别改
-    #output = softmax_classifier.forward(np.array([[999,2,3], [3,1,2]]))
-    softmax_classifier.train(X_train, y_train, batch_size=16, epoch=16, lr=0.01, reg=0.01)
-    softmax_classifier.evaluate(X_test, y_test)
+    #softmax_classifier = softmax([3072,10]) #这句参数别改
+    softmax_classifier = softmax([3, 2])
+    output = softmax_classifier.forward(np.array([[999,2,3], [3,1,2]]))
+    #softmax_classifier.train(X_train, y_train, batch_size=16, epoch=16, lr=0.01, reg=0.01)
+    #softmax_classifier.evaluate(X_test, y_test)
