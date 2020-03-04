@@ -53,6 +53,7 @@ class softmax():
         dsoftmax /= batch_size
         dsoftmax += reg * np.sign(self.w[-1])
         self.w[-1] -= lr*dsoftmax
+        self.b[-1] -= lr*scores.sum(0) / batch_size
         #for layer in self.layers:
 
     def evaluate(self, x, y):
@@ -63,5 +64,5 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = data_utils.load_npy()
     softmax_classifier = softmax([3072,10]) #这句参数别改
     #output = softmax_classifier.forward(np.array([[999,2,3], [3,1,2]]))
-    #softmax_classifier.train(X_train, y_train, batch_size=16, epoch=16, lr=0.01, reg=0.01)
+    softmax_classifier.train(X_train, y_train, batch_size=16, epoch=16, lr=0.01, reg=0.01)
     softmax_classifier.evaluate(X_test, y_test)
