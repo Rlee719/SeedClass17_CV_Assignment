@@ -7,6 +7,8 @@
 /project1/test.py
 /project1/train_result/
 
+/project1/*.txt
+/project1/*.npy
 /project1/*.png
 .DS_Store
 
