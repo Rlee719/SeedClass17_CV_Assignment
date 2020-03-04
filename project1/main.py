@@ -138,13 +138,6 @@ def cro_val_plot(k_choices, k_to_accuracies, k_to_accuracies_hog):
         plt.savefig('Cross-validation-dist-metric-' + dist_m)
         plt.cla()
 
-
-################################################################################
-#                                                                              #
-#                                main program                                  #
-#                                                                              #
-################################################################################
-
 if __name__ == "__main__":
     #generate_hog_data()
 
