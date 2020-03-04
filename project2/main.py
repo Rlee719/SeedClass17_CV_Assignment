@@ -1,7 +1,8 @@
 import data_utils
 import numpy as np
+import random
 
-def img_data_normalization(X_train, X_test):
+def img_data_normalize(X_train, X_test):
     return X_train/255 - 0.5, X_test/255 - 0.5
 
 class softmax():
@@ -22,13 +23,19 @@ class softmax():
         self.layer_num = len(self.layers)
 
 
+    def shuffle(self, x, y):
+        random_arr = [i for i in range(len(x))]
+        random.shuffle(random_arr)
+        return x[random_arr], y[random_arr]
+
     def softmax(self, vector):
         output = np.exp(vector) / np.exp(vector).sum(axis=1).reshape(-1, 1)
         return output
 
 
-    def softmax_loss(self, labels, scores, batch_size, reg, normalize_type):
+    def softmax_loss(self, labels, scores, reg, normalize_type):
         loss = 0.0
+        batch_size = labels.shape[0]
         for i, label in enumerate(labels):
             loss -= np.log(scores[i][label]) 
         loss /= batch_size
@@ -46,12 +53,12 @@ class softmax():
     def get_acc_avg(self, output, y):
         return  np.sum(output.argmax(1) == y) / y.shape[0]
 
-    def evaluate_numerical_gradient(self, x_batch, y_batch, scores, batch_size, reg, normalize_type):
+    def evaluate_numerical_gradient(self, x_batch, y_batch, scores, reg, normalize_type):
         h = 0.00001
         grad_w = np.zeros(self.w[-1].shape)
         grad_b = np.zeros(self.b[-1].shape)
 
-        loss = self.softmax_loss(y_batch, scores,batch_size, reg, normalize_type)
+        loss = self.softmax_loss(y_batch, scores, reg, normalize_type)
 
         it = np.nditer(self.w[-1], flags=['multi_index'])
         while not it.finished:
@@ -59,7 +66,7 @@ class softmax():
             old_value = self.w[-1][iw]
             self.w[-1][iw] += h
             score_h = self.forward(x_batch)
-            loss_h = self.softmax_loss(y_batch, score_h,batch_size, reg, normalize_type)
+            loss_h = self.softmax_loss(y_batch, score_h, reg, normalize_type)
             self.w[-1][iw] = old_value
             grad_w[iw] = (loss_h - loss) / h
             it.iternext()
@@ -70,7 +77,7 @@ class softmax():
             old_value = self.b[-1][ib]
             self.b[-1][ib] += h
             score_h = self.forward(x_batch)
-            loss_h = self.softmax_loss(y_batch, score_h,batch_size, reg, normalize_type)
+            loss_h = self.softmax_loss(y_batch, score_h, reg, normalize_type)
             self.b[-1][ib] = old_value
             grad_b[ib] = (loss_h - loss) / h
             it.iternext()
@@ -78,7 +85,8 @@ class softmax():
         return grad_w, grad_b
 
     
-    def evaluate_analytic_grad(self, x_batch, y_batch, scores, batch_size, reg, normalize_type):
+    def evaluate_analytic_grad(self, x_batch, y_batch, scores, reg, normalize_type):
+        batch_size = x_batch.shape[0]
         for i, label in enumerate(y_batch):
             scores[i][label] -= 1
         d_w = np.dot(x_batch.T, scores) / batch_size
@@ -111,19 +119,21 @@ class softmax():
 
 
     def train(self, x, y, batch_size, epoch, lr, reg=0, normalize_type='none'):   
+        batch_num = int(np.floor(x.shape[0] / batch_size))
         for e in range(epoch):
-            batch_num = int(np.floor(x.shape[0] / batch_size))
+            x, y = self.shuffle(x, y)
             for batch in range(batch_num):
                 x_batch = x[batch*batch_size:(batch+1)*batch_size]
                 y_batch = y[batch*batch_size:(batch+1)*batch_size]
                 output = self.forward(x_batch)
-                loss = self.softmax_loss(y_batch, output, batch_size, reg, normalize_type)
-                self.optimize(x_batch, y_batch, output, batch_size, lr, reg, normalize_type)
-                print("epoch: %d / %d, batch: %d / %d, loss = %f, acc = %f" % (e + 1, epoch,batch+1,batch_num, loss, self.get_acc_avg(output, y_batch)))
+                loss = self.softmax_loss(y_batch, output, reg, normalize_type)
+                acc = self.get_acc_avg(output, y_batch)
+                self.optimize(x_batch, y_batch, output, lr, reg, normalize_type)
+                print("epoch: %d / %d, batch: %d / %d, loss = %f, acc = %f" % (e + 1, epoch,batch+1,batch_num, loss, acc))
     
 
-    def optimize(self, x_batch, y_batch, scores, batch_size, lr, reg, normalize_type):
-        d_w, d_b = self.evaluate_analytic_grad(x_batch, y_batch, scores, batch_size, reg, normalize_type)
+    def optimize(self, x_batch, y_batch, scores, lr, reg, normalize_type):
+        d_w, d_b = self.evaluate_analytic_grad(x_batch, y_batch, scores, reg, normalize_type)
         # d_w_, d_b_ = self.evaluate_numerical_gradient(x_batch, y_batch, scores, batch_size, reg, normalize_type)
         # print(d_b)
         # print(d_b_)
@@ -137,11 +147,19 @@ class softmax():
         output = self.forward(x)
         return self.get_acc_avg(output, y)
 
+
 if __name__ == "__main__":
     X_train, X_test, y_train, y_test = data_utils.load_npy()
-    X_train, X_test = img_data_normalization(X_train, X_test)
+
+    print("Doing: normalize img data")
+    X_train, X_test = img_data_normalize(X_train, X_test)
+
+    print("Doing: set net parameter")
     softmax_classifier = softmax([3072,10]) #这句参数别改
-    #output = softmax_classifier.forward(np.array([[999,2,3], [3,1,2]]))
-    softmax_classifier.train(X_train, y_train, batch_size=32, epoch=2, lr=0.15, reg=0.01, normalize_type='none')
+
+    print("Doing: train net")
+    softmax_classifier.train(X_train, y_train, batch_size=256, epoch=2, lr=0.15, reg=0.01, normalize_type='none')
+
+    print("Doing: test net")
     acc_test = softmax_classifier.evaluate(X_test, y_test)
-    print(acc_test)
+    print("test accuracy is ", acc_test)
