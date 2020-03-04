@@ -79,7 +79,6 @@ class softmax():
             self.layers[i] = np.dot(cache, self.w[i]) + self.b[i]
             cache = self.layers[i]
         outputs = self.softmax(self.layers[-1])
-        #print(self.layers[-1])
         return outputs
 
     def train(self, x, y, batch_size, epoch, lr, reg):   
@@ -105,13 +104,11 @@ class softmax():
     def optimize(self, x_batch, y_batch, scores, batch_size, lr, reg):
         for i, label in enumerate(y_batch):
             scores[i][label] -= 1
-        #print(scores.shape)
-        #print(x_batch.shape)
         dsoftmax = np.dot(x_batch.T, scores)
         dsoftmax /= batch_size
         #dsoftmax += reg * np.sign(self.w[-1])
         self.w[-1] -= lr * dsoftmax
-        #self.b[-1] -= lr * scores.sum(0) / batch_size
+        self.b[-1] -= lr * scores.sum(0) / batch_size
         #for layer in self.layers:
 
     def evaluate(self, x, y):
@@ -124,5 +121,5 @@ if __name__ == "__main__":
     X_train = X_train / 255 - 0.5
     softmax_classifier = softmax([3072,10]) #这句参数别改
     #output = softmax_classifier.forward(np.array([[999,2,3], [3,1,2]]))
-    softmax_classifier.train(X_train, y_train, batch_size=8, epoch=8, lr=0.0001, reg=0.01)
+    softmax_classifier.train(X_train, y_train, batch_size=32, epoch=2, lr=0.15, reg=0.01)
     softmax_classifier.evaluate(X_test, y_test)
