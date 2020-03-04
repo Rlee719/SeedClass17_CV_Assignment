@@ -8,4 +8,8 @@
 - [ ] Determine the best k & distance metric
 - [ ] Due in the next work: source code, slides and oral presentation
 
+## Project 2: Building an softmax classifier on Cifar10 dataset
+
+
+
 把 cifar-10-batches-py 放置在 project1 目录。

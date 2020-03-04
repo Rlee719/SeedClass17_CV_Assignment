@@ -16,8 +16,8 @@ def load_data_set():
     X_test = np.reshape(X_test, (X_test.shape[0], -1))
 
     # 根据课程需要，将训练集缩小为 1/5
-    X_train, y_train = extract_CIFAR10_samples(X_train, y_train, X_train.shape[0] / 5)
-    X_test, y_test = extract_CIFAR10_samples(X_test, y_test, X_test.shape[0] / 5)
+    X_train, y_train = extract_CIFAR10_samples(X_train, y_train, X_train.shape[0])
+    X_test, y_test = extract_CIFAR10_samples(X_test, y_test, X_test.shape[0])
     return X_train, y_train, X_test, y_test
 
 def generate_hog_data():
@@ -142,9 +142,16 @@ def cro_val_plot(k_choices, k_to_accuracies, k_to_accuracies_hog):
 ################################################################################
 
 if __name__ == "__main__":
-    generate_hog_data()
+    #generate_hog_data()
 
     X_train, y_train, X_test, y_test = load_data_set()
+    '''
+    np.save("X_train", X_train)
+    np.save("y_train", y_train)
+    np.save("X_test", X_test)
+    np.save("y_test", y_test)
+    sys.exit()
+    '''
     X_hog_train, X_hog_test, y_hog_train, y_hog_test = load_hog_data()
 
     # 运行训练

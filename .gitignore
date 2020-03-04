@@ -12,4 +12,9 @@
 /project1/*.png
 .DS_Store
 
+/project2/*.txt
+/project2/*.npy
+/project2/*.png
+/project2/test.py
+
 .idea/
