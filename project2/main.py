@@ -1,9 +1,12 @@
 import data_utils
 import numpy as np
 import random
+import matplotlib.pyplot as plt
+
 
 def img_data_normalize(X_train, X_test):
     return X_train/255 - 0.5, X_test/255 - 0.5
+
 
 class softmax():
     def __init__(self, model_config):
@@ -119,7 +122,7 @@ class softmax():
 
 
     def train(self, x, y, batch_size, epoch, lr, reg=0, normalize_type='none'):   
-        batch_num = int(np.floor(x.shape[0] / batch_size))
+        batch_num = x.shape[0] // batch_size
         for e in range(epoch):
             x, y = self.shuffle(x, y)
             for batch in range(batch_num):
@@ -149,16 +152,30 @@ class softmax():
 
 
 if __name__ == "__main__":
+    print("Doing: load image data")
+    # X_train, y_train, X_test, y_test = data_utils.load_CIFAR10('../cifar-10-batches-py')
+
+    # 图像左右翻转增加数据集
+    print("Doing: image enhance")
+    # X_train, X_test, y_train, y_test = data_utils.create_image_enhance(X_train, X_test, y_train, y_test)
+
+    # 加载 npy 文件
+    print("Doing: load npy files")
     X_train, X_test, y_train, y_test = data_utils.load_npy()
 
-    print("Doing: normalize img data")
+    # 将单幅图片转成 3072 维的向量
+    print("Doing: image data reshape")
+    X_train = np.reshape(X_train, (X_train.shape[0], -1))
+    X_test = np.reshape(X_test, (X_test.shape[0], -1))
+
+    print("Doing: normalize image data")
     X_train, X_test = img_data_normalize(X_train, X_test)
 
-    print("Doing: set net parameter")
-    softmax_classifier = softmax([3072,10]) #这句参数别改
+    print("Doing: set net size parameter")
+    softmax_classifier = softmax([3072,10])
 
     print("Doing: train net")
-    softmax_classifier.train(X_train, y_train, batch_size=256, epoch=2, lr=0.15, reg=0.01, normalize_type='none')
+    softmax_classifier.train(X_train, y_train, batch_size=256, epoch=5, lr=0.04, reg=0.0005, normalize_type='L2')
 
     print("Doing: test net")
     acc_test = softmax_classifier.evaluate(X_test, y_test)

@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 def load_data_set():
     # 加载数据集
-    cifar10_dir = 'cifar-10-batches-py'
+    cifar10_dir = '../cifar-10-batches-py'
     X_train, y_train, X_test, y_test = load_CIFAR10(cifar10_dir)
 
     # 将单幅图片转成 3072 维的向量

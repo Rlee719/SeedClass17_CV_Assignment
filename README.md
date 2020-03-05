@@ -1,5 +1,8 @@
 # Code for CV Assignment of SeedClass_17
 ***[Rlee719](https://github.com/Rlee719), [RyuGuo](https://github.com/RyuGuo), [Skylyyun](https://github.com/Skylyyun)***
+
+**把 cifar-10-batches-py 放置在 根 目录。**
+
 ## Project 1: Building an image classifier on Cifar10 dataset using image features and classifiers
 
 - [ ] Cifar10 https://www.cs.toronto.edu/~kriz/cifar.html, 50000 training images and 10000 test images. 
@@ -8,7 +11,6 @@
 - [ ] Determine the best k & distance metric
 - [ ] Due in the next work: source code, slides and oral presentation
 
-把 cifar-10-batches-py 放置在 project1 目录。
 
 ## Project 2: Implementing a Softmax classifier for Cifar10 image classification
 
