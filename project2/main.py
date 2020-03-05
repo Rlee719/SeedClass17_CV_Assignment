@@ -1,6 +1,7 @@
 import data_utils
 import numpy as np
 import random
+import copy
 import matplotlib.pyplot as plt
 
 
@@ -121,18 +122,32 @@ class softmax():
         return outputs
 
 
-    def train(self, x, y, batch_size, epoch, lr, reg=0, normalize_type='none'):   
+    def train(self, x, y, batch_size, epoch, lr, reg=0, normalize_type='none'):
+        best_acc = 0
+        best_w = copy.deepcopy(self.w)
+        best_b = copy.deepcopy(self.b)
         batch_num = x.shape[0] // batch_size
         for e in range(epoch):
             x, y = self.shuffle(x, y)
+            acc_sum = 0
             for batch in range(batch_num):
                 x_batch = x[batch*batch_size:(batch+1)*batch_size]
                 y_batch = y[batch*batch_size:(batch+1)*batch_size]
                 output = self.forward(x_batch)
                 loss = self.softmax_loss(y_batch, output, reg, normalize_type)
                 acc = self.get_acc_avg(output, y_batch)
+                acc_sum += acc
                 self.optimize(x_batch, y_batch, output, lr, reg, normalize_type)
-                print("epoch: %d / %d, batch: %d / %d, loss = %f, acc = %f" % (e + 1, epoch,batch+1,batch_num, loss, acc))
+                # print("epoch: %d / %d, batch: %d / %d, loss = %f, acc = %f" % (e + 1, epoch,batch+1,batch_num, loss, acc))
+            acc_avg = acc_sum / batch_num
+            if best_acc < acc_avg:
+                best_acc = acc_avg
+                best_w = copy.deepcopy(self.w)
+                best_b = copy.deepcopy(self.b)
+            print("epoch %d / %d: acc = %f" % (e + 1, epoch, acc_avg))
+        print("Training complete. Best accuracy is ", acc_avg)
+        self.w = best_w
+        self.b = best_b
     
 
     def optimize(self, x_batch, y_batch, scores, lr, reg, normalize_type):
@@ -175,7 +190,7 @@ if __name__ == "__main__":
     softmax_classifier = softmax([3072,10])
 
     print("Doing: train net")
-    softmax_classifier.train(X_train, y_train, batch_size=256, epoch=5, lr=0.04, reg=0.0005, normalize_type='L2')
+    softmax_classifier.train(X_train, y_train, batch_size=256, epoch=10, lr=0.04, reg=0.00005, normalize_type='L1')
 
     print("Doing: test net")
     acc_test = softmax_classifier.evaluate(X_test, y_test)
