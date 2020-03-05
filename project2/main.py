@@ -3,6 +3,7 @@ import numpy as np
 import random
 import copy
 import matplotlib.pyplot as plt
+import plot
 
 
 def img_data_normalize(X_train, X_test):
@@ -124,6 +125,7 @@ class softmax():
 
     def train(self, x, y, batch_size, epoch, lr, reg=0, normalize_type='none'):
         best_acc = 0
+        epoch_list, acc_avg_list, losses_list = [], [], []
         best_w = copy.deepcopy(self.w)
         best_b = copy.deepcopy(self.b)
         batch_num = x.shape[0] // batch_size
@@ -139,12 +141,17 @@ class softmax():
                 acc_sum += acc
                 self.optimize(x_batch, y_batch, output, lr, reg, normalize_type)
                 # print("epoch: %d / %d, batch: %d / %d, loss = %f, acc = %f" % (e + 1, epoch,batch+1,batch_num, loss, acc))
+                losses_list.append(loss)
             acc_avg = acc_sum / batch_num
             if best_acc < acc_avg:
                 best_acc = acc_avg
                 best_w = copy.deepcopy(self.w)
                 best_b = copy.deepcopy(self.b)
             print("epoch %d / %d: acc = %f" % (e + 1, epoch, acc_avg))
+            epoch_list.append(e+1)
+            acc_avg_list.append(acc_avg)
+        plot.loss(losses_list, batch_num)
+        plot.accuracy(epoch_list, acc_avg_list)
         print("Training complete. Best accuracy is ", acc_avg)
         self.w = best_w
         self.b = best_b
@@ -163,8 +170,8 @@ class softmax():
 
     def evaluate(self, x, y):
         output = self.forward(x)
+        plot.roc(y, output.argmax(1))
         return self.get_acc_avg(output, y)
-
 
 if __name__ == "__main__":
     print("Doing: load image data")
