@@ -4,10 +4,38 @@ import random
 import copy
 import matplotlib.pyplot as plt
 import plot
+import math
 
 
 def img_data_normalize(X_train, X_test):
     return X_train/255 - 0.5, X_test/255 - 0.5
+
+def three_loss_plot():
+    loss_list = []
+    for i in range(3):
+        if i == 0:
+            softmax_classifier = softmax([3072,10])
+            loss = softmax_classifier.train(X_train, y_train, batch_size=256, epoch=50, lr=0.04, reg=0.00002, normalize_type='none')
+            loss_list.append(loss)
+        elif  i  == 1:
+            softmax_classifier = softmax([3072,10])
+            loss = softmax_classifier.train(X_train, y_train, batch_size=256, epoch=50, lr=0.04, reg=0.00002, normalize_type='L1')
+            loss_list.append(loss)
+        else:
+            softmax_classifier = softmax([3072,10])
+            loss = softmax_classifier.train(X_train, y_train, batch_size=256, epoch=1, lr=0.04, reg=0.00001, normalize_type='L2')
+            loss_list.append(loss)
+    plot.three_loss(loss_list)
+
+
+def reg_plot(reg_num, L_method):
+    loss_list = []
+    for i in range(1, reg_num):
+        softmax_classifier = softmax([3072,10])
+        loss = softmax_classifier.train(X_train, y_train, batch_size=256, epoch=50, lr=0.04, reg= 1/(math.pow(10, reg_num)), normalize_type=L_method)
+        loss_list.append(loss)
+    plot.reg_loss(loss_list)
+
 
 
 class softmax():
@@ -16,6 +44,7 @@ class softmax():
         self.model_config = model_config
         self.layers, self.w, self.b = [], [], []
         self.init_model()
+
 
     def init_model(self):
         for i, layer in enumerate(self.model_config):
@@ -125,13 +154,13 @@ class softmax():
 
     def train(self, x, y, batch_size, epoch, lr, reg=0, normalize_type='none'):
         best_acc = 0
-        epoch_list, acc_avg_list, losses_list = [], [], []
+        epoch_list, loss_list = [], []
         best_w = copy.deepcopy(self.w)
         best_b = copy.deepcopy(self.b)
         batch_num = x.shape[0] // batch_size
         for e in range(epoch):
             x, y = self.shuffle(x, y)
-            acc_sum = 0
+            acc_sum = 0 
             for batch in range(batch_num):
                 x_batch = x[batch*batch_size:(batch+1)*batch_size]
                 y_batch = y[batch*batch_size:(batch+1)*batch_size]
@@ -140,8 +169,8 @@ class softmax():
                 acc = self.get_acc_avg(output, y_batch)
                 acc_sum += acc
                 self.optimize(x_batch, y_batch, output, lr, reg, normalize_type)
-                # print("epoch: %d / %d, batch: %d / %d, loss = %f, acc = %f" % (e + 1, epoch,batch+1,batch_num, loss, acc))
-                losses_list.append(loss)
+                #print("epoch: %d / %d, batch: %d / %d, loss = %f, acc = %f" % (e + 1, epoch,batch+1,batch_num, loss, acc))
+                loss_list.append(loss)
             acc_avg = acc_sum / batch_num
             if best_acc < acc_avg:
                 best_acc = acc_avg
@@ -149,13 +178,11 @@ class softmax():
                 best_b = copy.deepcopy(self.b)
             print("epoch %d / %d: acc = %f" % (e + 1, epoch, acc_avg))
             epoch_list.append(e+1)
-            acc_avg_list.append(acc_avg)
-        plot.loss(losses_list, batch_num)
-        plot.accuracy(epoch_list, acc_avg_list)
+
         print("Training complete. Best accuracy is ", acc_avg)
         self.w = best_w
         self.b = best_b
-    
+        return loss_list
 
     def optimize(self, x_batch, y_batch, scores, lr, reg, normalize_type):
         d_w, d_b = self.evaluate_analytic_grad(x_batch, y_batch, scores, reg, normalize_type)
@@ -197,7 +224,11 @@ if __name__ == "__main__":
     softmax_classifier = softmax([3072,10])
 
     print("Doing: train net")
-    softmax_classifier.train(X_train, y_train, batch_size=256, epoch=10, lr=0.04, reg=0.00005, normalize_type='L1')
+    softmax_classifier.train(X_train, y_train, batch_size=256, epoch=50, lr=0.04, reg=0.00002, normalize_type='none')
+
+    ## 画图
+    #three_loss_plot()
+    #reg_plot(5, 'L2')
 
     print("Doing: test net")
     acc_test = softmax_classifier.evaluate(X_test, y_test)

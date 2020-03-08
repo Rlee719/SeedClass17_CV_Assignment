@@ -17,13 +17,38 @@ def accuracy(x,y):
     plt.savefig("accuracy-epoch")
     plt.cla()
 
-def loss(losses, batch_num):
+def loss(x, y):
+    plt.figure()
+    plt.xlabel("training epoch")
+    plt.ylabel("loss")
+    plt.plot(x,y)
+    plt.savefig("loss-epoch")
+    plt.cla()
+
+def three_loss(x,y):
     plt.figure()
     plt.xlabel("training batch")
     plt.ylabel("loss")
-    plt.plot([mean(losses[i:i+batch_num]) for i in range(len(losses))])
-    plt.savefig("loss-batch")
+    plt.plot([mean(loss[0][i:i+1000])  for i in range(len(loss[0])-1000)], color = 'yellow',  label = 'none')
+    plt.plot([mean(loss[1][i:i+1000])  for i in range(len(loss[0])-1000)], color = 'red',    label = 'best L1')
+    plt.plot([mean(loss[2][i:i+1000])  for i in range(len(loss[0])-1000)], color = 'skyblue',label = 'best L2')
+    plt.legend() 
+    plt.savefig("three-loss-epoch")
     plt.cla()
+
+def reg_loss(loss):
+    plt.figure()
+    plt.xlabel("training batch")
+    plt.ylabel("loss")
+    plt.plot([mean(loss[0][i:i+1000])  for i in range(len(loss[0])-1000)], color = 'yellow',  label = 'reg = 0.1')
+    plt.plot([mean(loss[1][i:i+1000])  for i in range(len(loss[0])-1000)], color = 'red',    label = 'reg = 0.001')
+    plt.plot([mean(loss[2][i:i+1000])  for i in range(len(loss[0])-1000)], color = 'skyblue',label = 'reg = 0.0001')
+    plt.plot([mean(loss[3][i:i+1000])  for i in range(len(loss[0])-1000)], color = 'green',label = 'reg = 0.00001')
+    # plt.plot([mean(loss[4][i:i+100])  for i in range(len(loss[0])-100)], color = 'brown',label = 'reg = 0.00004')
+    plt.legend() 
+    plt.savefig("reg-loss")
+    plt.cla()
+    
 
 def roc(Y_test, Y_pred): 
     n_classes = 10
@@ -49,13 +74,6 @@ def roc(Y_test, Y_pred):
     for i in range(n_classes):
         mean_tpr += interp(all_fpr, fpr[i], tpr[i])
 
-    # Finally average it and compute AUC
-    mean_tpr /= n_classes
-
-    fpr["macro"] = all_fpr
-    tpr["macro"] = mean_tpr
-    roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
-
     # Plot all ROC curves
     lw = 2
     plt.figure()
@@ -63,11 +81,6 @@ def roc(Y_test, Y_pred):
             label='micro-average ROC curve (area = {0:0.2f})'
                 ''.format(roc_auc["micro"]),
             color='deeppink', linestyle=':', linewidth=4)
-
-    plt.plot(fpr["macro"], tpr["macro"],
-            label='macro-average ROC curve (area = {0:0.2f})'
-                ''.format(roc_auc["macro"]),
-            color='navy', linestyle=':', linewidth=4)
 
     colors = cycle(['aqua', 'darkorange', 'cornflowerblue', 'purple', 'yellow', 'skyblue', 'red', 'silver', 'silver', 'maroon'])
     for i, color in zip(range(n_classes), colors):
