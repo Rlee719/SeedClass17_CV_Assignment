@@ -32,10 +32,9 @@ def reg_plot(reg_num, L_method):
     loss_list = []
     for i in range(1, reg_num):
         softmax_classifier = softmax([3072,10])
-        loss = softmax_classifier.train(X_train, y_train, batch_size=256, epoch=50, lr=0.04, reg= 1/(math.pow(10, reg_num)), normalize_type=L_method)
+        loss = softmax_classifier.train(X_train, y_train, batch_size=256, epoch=50, lr=0.04, reg= 1/(math.pow(10, i)), normalize_type=L_method)
         loss_list.append(loss)
     plot.reg_loss(loss_list)
-
 
 
 class softmax():
@@ -220,16 +219,16 @@ if __name__ == "__main__":
     print("Doing: normalize image data")
     X_train, X_test = img_data_normalize(X_train, X_test)
 
-    print("Doing: set net size parameter")
-    softmax_classifier = softmax([3072,10])
+    # print("Doing: set net size parameter")
+    # softmax_classifier = softmax([3072,10])
 
-    print("Doing: train net")
-    softmax_classifier.train(X_train, y_train, batch_size=256, epoch=50, lr=0.04, reg=0.00002, normalize_type='none')
+    # print("Doing: train net")
+    # softmax_classifier.train(X_train, y_train, batch_size=256, epoch=50, lr=0.04, reg=0.00002, normalize_type='none')
 
     ## 画图
     #three_loss_plot()
-    #reg_plot(5, 'L2')
+    reg_plot(6, 'L2')
 
-    print("Doing: test net")
-    acc_test = softmax_classifier.evaluate(X_test, y_test)
-    print("test accuracy is ", acc_test)
+    # print("Doing: test net")
+    # acc_test = softmax_classifier.evaluate(X_test, y_test)
+    # print("test accuracy is ", acc_test)
