@@ -69,7 +69,28 @@ def plot_3d(X, Y, Z, label, save_name):
     #plt.show()
     plt.cla()
 
+def roc(y_true, y_score):
+    fpr, tpr, thresholds = roc_curve(y_true, y_score)
+    print(fpr, tpr, thresholds)
 
+    plt.figure()
+    plt.plot(fpr["micro"], tpr["micro"],
+            label='micro-average ROC curve',color='deeppink', linestyle=':', linewidth=4)
+    #colors = cycle(['aqua', 'darkorange', 'cornflowerblue', 'purple', 'yellow', 'skyblue', 'red', 'silver', 'silver', 'maroon'])
+    plt.plot(fpr, tpr,
+                label='ROC curve'
+                ''.format(i))
+
+    #plt.plot([0, 1], [0, 1], 'k--',)
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.legend(loc="lower right")
+    plt.savefig("roc")
+    plt.cla()
+
+'''
 def roc(Y_test, Y_pred): 
     n_classes = 10
     Y_test = label_binarize(Y_test, classes=[i for i in range(n_classes)])
@@ -116,3 +137,4 @@ def roc(Y_test, Y_pred):
     plt.legend(loc="lower right")
     plt.savefig("roc")
     plt.cla()
+'''

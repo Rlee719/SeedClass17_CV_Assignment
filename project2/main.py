@@ -202,7 +202,9 @@ class softmax():
 
     def evaluate(self, x, y):
         output = self.forward(x)
-        plot.roc(y, output.argmax(1))
+        np.save("y", y)
+        np.save("output", output)
+        plot.roc(y, output)
         return self.get_acc_avg(output, y)
 
 if __name__ == "__main__":
@@ -232,12 +234,12 @@ if __name__ == "__main__":
     # softmax_classifier = softmax([3072,10])
 
     # print("Doing: train net")
-    # softmax_classifier.train(X_train, y_train, batch_size=256, epoch=50, lr=0.04, reg=0.00002, normalize_type='none')
-
+    softmax_classifier.train(X_train, y_train, batch_size=32, epoch=2, lr=0.005, reg=0.00002, normalize_type='none')
+    softmax_classifier.evaluate(X_test, y_test)
     ## 画图
     #three_loss_plot()
     #reg_plot(6, 'L2')
-    find_param_plot(batch_size_list=[16,32,64,128], lr_list=[0.005, 0.01, 0.02, 0.03, 0.04, 0.1], 'L2')
+    #find_param_plot(batch_size_list=[16,32,64,128], lr_list=[0.005, 0.01, 0.02, 0.03, 0.04, 0.1], 'L2')
     # print("Doing: test net")
     # acc_test = softmax_classifier.evaluate(X_test, y_test)
     # print("test accuracy is ", acc_test)
