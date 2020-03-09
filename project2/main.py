@@ -5,7 +5,7 @@ import copy
 import matplotlib.pyplot as plt
 import plot
 import math
-
+import sys
 
 def img_data_normalize(X_train, X_test):
     return X_train/255 - 0.5, X_test/255 - 0.5
@@ -33,6 +33,14 @@ def reg_plot(reg_num, L_method):
     for i in range(1, reg_num):
         softmax_classifier = softmax([3072,10])
         loss = softmax_classifier.train(X_train, y_train, batch_size=256, epoch=50, lr=0.04, reg= 1/(math.pow(10, i)), normalize_type=L_method)
+        loss_list.append(loss)
+    plot.reg_loss(loss_list)
+
+def batch_size_plot(batch_size_list, L_method):
+    loss_list = []
+    for batch_size in batch_size_list:
+        softmax_classifier = softmax([3072,10])
+        loss = softmax_classifier.train(X_train, y_train, batch_size=batch_size, epoch=10, lr=0.04, reg= 1e-5, normalize_type=L_method)
         loss_list.append(loss)
     plot.reg_loss(loss_list)
 
@@ -82,7 +90,6 @@ class softmax():
             print("Please choose correct normalize type: (none, L1, L2) ")
             quit()
 
-
     def get_acc_avg(self, output, y):
         return  np.sum(output.argmax(1) == y) / y.shape[0]
 
@@ -117,7 +124,6 @@ class softmax():
         
         return grad_w, grad_b
 
-    
     def evaluate_analytic_grad(self, x_batch, y_batch, scores, reg, normalize_type):
         batch_size = x_batch.shape[0]
         for i, label in enumerate(y_batch):
@@ -140,7 +146,6 @@ class softmax():
         
         return d_w, d_b
 
-
     def forward(self, x):
         outputs = []
         cache = x
@@ -149,7 +154,6 @@ class softmax():
             cache = self.layers[i]
         outputs = self.softmax(self.layers[-1])
         return outputs
-
 
     def train(self, x, y, batch_size, epoch, lr, reg=0, normalize_type='none'):
         best_acc = 0
@@ -193,20 +197,22 @@ class softmax():
         self.b[-1] -= lr * d_b
         #for layer in self.layers:
 
-
     def evaluate(self, x, y):
         output = self.forward(x)
         plot.roc(y, output.argmax(1))
         return self.get_acc_avg(output, y)
 
 if __name__ == "__main__":
+    
+    '''
     print("Doing: load image data")
-    # X_train, y_train, X_test, y_test = data_utils.load_CIFAR10('../cifar-10-batches-py')
+    X_train, y_train, X_test, y_test = data_utils.load_CIFAR10('../cifar-10-batches-py')
 
     # 图像左右翻转增加数据集
     print("Doing: image enhance")
-    # X_train, X_test, y_train, y_test = data_utils.create_image_enhance(X_train, X_test, y_train, y_test)
-
+    data_utils.create_image_enhance_npy(X_train, X_test, y_train, y_test)
+    '''
+    
     # 加载 npy 文件
     print("Doing: load npy files")
     X_train, X_test, y_train, y_test = data_utils.load_npy()
@@ -218,7 +224,7 @@ if __name__ == "__main__":
 
     print("Doing: normalize image data")
     X_train, X_test = img_data_normalize(X_train, X_test)
-
+    #sys.exit()
     # print("Doing: set net size parameter")
     # softmax_classifier = softmax([3072,10])
 
@@ -227,8 +233,8 @@ if __name__ == "__main__":
 
     ## 画图
     #three_loss_plot()
-    reg_plot(6, 'L2')
-
+    #reg_plot(6, 'L2')
+    batch_size_plot([16,32,64,128], 'L2')
     # print("Doing: test net")
     # acc_test = softmax_classifier.evaluate(X_test, y_test)
     # print("test accuracy is ", acc_test)
