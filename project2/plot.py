@@ -1,9 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
 from sklearn.metrics import auc, roc_auc_score, roc_curve
 from sklearn.preprocessing import label_binarize
 from scipy import interp
 from itertools import cycle
+from matplotlib import cm
 
 
 def mean(li):
@@ -49,6 +52,23 @@ def reg_loss(loss):
     plt.savefig("reg-loss")
     plt.cla()
     
+def plot_3d(X, Y, Z, label, save_name):
+    Z = np.array(Z)
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
+    ax.set_xlabel(label[0])
+    ax.set_ylabel(label[1])
+    ax.set_zlabel(label[2])
+    X, Y = np.meshgrid(np.array(X), np.array(Y))
+    ax.plot_surface(X, Y, Z.reshape((X.shape[0], X.shape[1])), rstride = 1, cstride = 1, cmap='rainbow', linewidth=0, antialiased=False)
+    #ax.set_zlim(-1.01, 1.01)
+    ax.zaxis.set_major_locator(LinearLocator(10))
+    ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+    plt.legend() 
+    plt.savefig(save_name)
+    #plt.show()
+    plt.cla()
+
 
 def roc(Y_test, Y_pred): 
     n_classes = 10

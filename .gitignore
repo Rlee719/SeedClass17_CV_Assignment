@@ -6,6 +6,6 @@ cifar-10-batches-py/
 /project?/cifar-10-python.tar.gz
 /project?/*.npy
 /project?/*.png
-/project?/test.py
+/project1/test.py
 /project?/__pycache__
 .vscode/

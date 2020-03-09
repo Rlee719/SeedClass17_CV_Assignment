@@ -36,14 +36,17 @@ def reg_plot(reg_num, L_method):
         loss_list.append(loss)
     plot.reg_loss(loss_list)
 
-def batch_size_plot(batch_size_list, L_method):
-    loss_list = []
+def find_param_plot(batch_size_list, lr_list, L_method):
+    loss_list, train_acc_list = [], []
     for batch_size in batch_size_list:
-        softmax_classifier = softmax([3072,10])
-        loss = softmax_classifier.train(X_train, y_train, batch_size=batch_size, epoch=10, lr=0.04, reg= 1e-5, normalize_type=L_method)
-        loss_list.append(loss)
-    plot.reg_loss(loss_list)
-
+        for lr in lr_list:
+            softmax_classifier = softmax([3072,10])
+            loss, best_acc = softmax_classifier.train(X_train, y_train, batch_size=batch_size, epoch=10, lr=lr, reg= 1e-5, normalize_type=L_method)
+            loss = min(loss)
+            loss_list.append(loss)
+            train_acc_list.append(best_acc)
+    plot.plot_3d(batch_size_list, lr_list, loss_list, ["batch_size", "learning rate", "loss"], "bs-lr-loss")
+    plot.plot_3d(batch_size_list, lr_list, train_acc_list, ["batch_size", "learning rate", "train_acc"], "bs-lr-acc")
 
 class softmax():
     def __init__(self, model_config):
@@ -182,10 +185,10 @@ class softmax():
             print("epoch %d / %d: acc = %f" % (e + 1, epoch, acc_avg))
             epoch_list.append(e+1)
 
-        print("Training complete. Best accuracy is ", acc_avg)
+        print("Training complete. Best accuracy is ", best_acc)
         self.w = best_w
         self.b = best_b
-        return loss_list
+        return loss_list, best_acc
 
     def optimize(self, x_batch, y_batch, scores, lr, reg, normalize_type):
         d_w, d_b = self.evaluate_analytic_grad(x_batch, y_batch, scores, reg, normalize_type)
@@ -234,7 +237,7 @@ if __name__ == "__main__":
     ## 画图
     #three_loss_plot()
     #reg_plot(6, 'L2')
-    batch_size_plot([16,32,64,128], 'L2')
+    find_param_plot(batch_size_list=[16,32,64,128], lr_list=[0.005, 0.01, 0.02, 0.03, 0.04, 0.1], 'L2')
     # print("Doing: test net")
     # acc_test = softmax_classifier.evaluate(X_test, y_test)
     # print("test accuracy is ", acc_test)
