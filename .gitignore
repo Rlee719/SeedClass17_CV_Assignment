@@ -1,6 +1,7 @@
 .DS_Store
 .idea/
 cifar-10-batches-py/
+/project1/test_npy
 /project?/cifar-10-batches-py/
 /project?/cifar-10-python.tar.gz
 /project?/*.npy
