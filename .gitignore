@@ -8,4 +8,6 @@ cifar-10-batches-py/
 /project?/*.png
 /project1/test.py
 /project?/__pycache__
+*.npy
+*.png
 .vscode/
