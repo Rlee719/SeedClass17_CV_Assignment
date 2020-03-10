@@ -30,21 +30,15 @@ def load_CIFAR10(ROOT):
 
 
 def create_image_npy(X_train, X_test, y_train, y_test, save_path = ''):
-  if os.path.isfile("X_train") and os.path.isfile("y_train") and os.path.isfile("X_test") and os.path.isfile("y_test"):
-    print("npy files exist")
-  else:
     print("create npy files:")
-    np.save(save_path + "X_train", X_train)
+    np.save(save_path + "X_train", X_train.astype(np.float32))
     np.save(save_path + "y_train", y_train)
-    np.save(save_path + "X_test", X_test)
+    np.save(save_path + "X_test", X_test.astype(np.float32))
     np.save(save_path + "y_test", y_test)
     print("create npy files success")
 
 
 def create_image_enhance_npy(X_train, X_test, y_train, y_test, save_path = ''):
-  if os.path.isfile("X_train") and os.path.isfile("y_train") and os.path.isfile("X_test") and os.path.isfile("y_test"):
-    print("npy files exist")
-  else:
     data_size = X_train.shape[0]
     newX, newY = [], []
     print("create npy files:")
@@ -55,9 +49,9 @@ def create_image_enhance_npy(X_train, X_test, y_train, y_test, save_path = ''):
         newY.append(y_train[i])
     X_train = np.array(newX)
     y_train = np.array(newY)
-    np.save(save_path + "X_train", X_train)
+    np.save(save_path + "X_train", img_data_normalize(X_train).astype(np.float32))
     np.save(save_path + "y_train", y_train)
-    np.save(save_path + "X_test", X_test)
+    np.save(save_path + "X_test", img_data_normalize(X_test).astype(np.float32))
     np.save(save_path + "y_test", y_test)
     print("create npy files success")
     return X_train, X_test, y_train, y_test
@@ -69,3 +63,7 @@ def load_npy(read_dir = ''):
     y_train = np.load(read_dir + "y_train.npy")
     y_test = np.load(read_dir + "y_test.npy")
     return X_train, X_test, y_train, y_test
+
+
+def img_data_normalize(X):
+    return X / 255 - 0.5
