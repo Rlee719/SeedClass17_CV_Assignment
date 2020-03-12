@@ -31,9 +31,9 @@ def load_CIFAR10(ROOT):
 
 def create_image_npy(X_train, X_test, y_train, y_test, save_path = ''):
     print("create npy files:")
-    np.save(save_path + "X_train", X_train.astype(np.float32))
+    np.save(save_path + "X_train", img_data_normalize(X_train).astype(np.float32))
     np.save(save_path + "y_train", y_train)
-    np.save(save_path + "X_test", X_test.astype(np.float32))
+    np.save(save_path + "X_test", img_data_normalize(X_test).astype(np.float32))
     np.save(save_path + "y_test", y_test)
     print("create npy files success")
 

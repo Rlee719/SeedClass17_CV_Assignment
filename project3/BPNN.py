@@ -54,8 +54,8 @@ class BPNN():
                 continue
             else:
                 self.layers.append(np.zeros(layer))
-                self.w.append(np.zeros((self.model_config[0][i-1], layer)))
-                self.b.append(np.zeros((layer)))
+                self.w.append(np.ones((self.model_config[0][i-1], layer)))
+                self.b.append(np.ones((layer)))
                 self.act_func_dir.append(self.model_config[1][i-1])
         self.layer_num = len(self.layers)
 
@@ -65,8 +65,9 @@ class BPNN():
         #   vector: 最后一层输出 (batch_size x 10(或者class_num))
         # output:
         #   output: 预测概率     (batch_size x 10(或者class_num))
-        m = np.max(vector)
-        output = np.exp(vector-m) / np.exp(vector-m).sum(axis=1).reshape(-1, 1)
+        m = np.max(vector, axis=1, keepdims=True)
+        exp_scores = np.exp(vector-m)
+        output = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
         return output
 
 
@@ -157,15 +158,13 @@ class BPNN():
             Y[i][label] = 1
         d_w, d_b = list(range(self.layer_num)), list(range(self.layer_num))
         
-        i = self.layer_num-1
-        delta = (p - Y) * self.act_func_dir[i]["f'"](self.layers[i])
+        delta = (p - Y) * self.act_func_dir[-1]["f'"](self.layers[-1])
         for i in range(self.layer_num-1, 0, -1):
             d_w[i] = np.dot(self.layers[i-1].T, delta) / batch_size
             d_b[i] = delta.sum(0) / batch_size
             delta = np.dot(delta, self.w[i].T) * self.act_func_dir[i-1]["f'"](self.layers[i-1])
-        i -= 1
-        d_w[i] = np.dot(X.T, delta) / batch_size
-        d_b[i] = delta.sum(0) / batch_size
+        d_w[0] = np.dot(X.T, delta) / batch_size
+        d_b[0] = delta.sum(0) / batch_size
 
         return d_w, d_b
 
