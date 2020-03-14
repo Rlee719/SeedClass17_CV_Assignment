@@ -10,6 +10,14 @@
 import numpy as np
 
 
+def _unact(x):
+    return x
+
+def _unact_derivative(y):
+    return np.ones(y.shape)
+
+unact = {"f":_unact, "f'":_unact_derivative}
+
 def _tanh(x):
     return np.tanh(x)
 
@@ -54,8 +62,11 @@ class BPNN():
                 continue
             else:
                 self.layers.append(np.zeros(layer))
-                self.w.append(np.ones((self.model_config[0][i-1], layer)))
-                self.b.append(np.ones((layer)))
+                self.w.append(np.random.rand(self.model_config[0][i-1], layer))
+                self.b.append(np.random.rand(layer))
+                # 不能初始化为0，否则梯度永远是0
+                # self.w.append(np.ones((self.model_config[0][i-1], layer)))
+                # self.b.append(np.ones((layer)))
                 self.act_func_dir.append(self.model_config[1][i-1])
         self.layer_num = len(self.layers)
 
@@ -94,7 +105,7 @@ class BPNN():
         return np.sum(p.argmax(1) == y) / y.shape[0]
 
 
-    def predict(self, X):
+    def forward(self, X):
         # input:
         #   X:  图片数据集矩阵  (batch_size x 3072)
         # output:
@@ -126,7 +137,7 @@ class BPNN():
             for batch in range(batch_num):
                 x_batch = X[batch*batch_size:(batch+1)*batch_size]
                 y_batch = y[batch*batch_size:(batch+1)*batch_size]
-                p = self.predict(x_batch)
+                p = self.forward(x_batch)
                 self.optimize(x_batch, y_batch, p, lr)
                 loss_sum += self.softmax_loss(y_batch, p)
                 acc_sum += self.get_acc_avg(y_batch, p)
@@ -187,7 +198,7 @@ class BPNN():
                 iw = it.multi_index
                 old_value = w[iw]
                 w[iw] += h
-                p_h = self.predict(X)
+                p_h = self.forward(X)
                 loss_h = self.softmax_loss(y, p_h)
                 w[iw] = old_value
                 grad_w[i][iw] = (loss_h - loss) / h
@@ -199,7 +210,7 @@ class BPNN():
                 ib = it.multi_index
                 old_value = b[ib]
                 b[ib] += h
-                p_h = self.predict(X)
+                p_h = self.forward(X)
                 loss_h = self.softmax_loss(y, p_h)
                 b[ib] = old_value
                 grad_b[i][ib] = (loss_h - loss) / h
@@ -208,6 +219,12 @@ class BPNN():
         return grad_w, grad_b
 
 
+    def predict(self, X):
+        p = self.forward(X)
+        return p.argmax(1)
+
     def evaluate(self, X, y):
-        p = self.predict(X)
+        p = self.forward(X)
         return self.get_acc_avg(y, p)
+
+    
