@@ -8,6 +8,7 @@
 '''
 
 import numpy as np
+import random
 
 
 def _unact(x):
@@ -70,6 +71,12 @@ class BPNN():
                 self.act_func_dir.append(self.model_config[1][i-1])
         self.layer_num = len(self.layers)
 
+
+    def shuffle(self, x, y):
+        random_arr = [i for i in range(len(x))]
+        random.shuffle(random_arr)
+        return x[random_arr], y[random_arr]
+    
 
     def softmax(self, vector):
         # input:
@@ -145,6 +152,7 @@ class BPNN():
 
         batch_num = X.shape[0] // batch_size
         for e in range(epoch):
+            X, y = self.shuffle(X, y)
             acc_sum, loss_sum = 0, 0
             for batch in range(batch_num):
                 x_batch = X[batch*batch_size:(batch+1)*batch_size]

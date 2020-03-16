@@ -37,7 +37,7 @@ if __name__ == "__main__":
     for i,t in enumerate(normallist):
         z.append([])
         for r in reg:
-            classifier = bpnn.BPNN([[2,3,2,2],[bpnn.tanh,bpnn.tanh,bpnn.tanh,bpnn.unact]])
+            classifier = bpnn.BPNN([[2,3,3,2],[bpnn.tanh,bpnn.tanh,bpnn.tanh,bpnn.unact]])
             train_loss_list, train_acc_list = classifier.train(X, y, lr=1, epoch=50, batch_size=20, normalize={"type":t, "reg":r})
             z[i].append(train_acc_list[-1])
     plot.draw_plot_3d([0,1,2], reg, z, "acc", "type", "reg", "acc", "acc.png")
