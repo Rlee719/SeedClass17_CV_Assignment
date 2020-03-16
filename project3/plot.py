@@ -37,3 +37,4 @@ def draw_plot_3d(X, Y, Z, title, xlabel, ylabel, zlabel, savepath):
     plt.title(title)
     plt.savefig(savepath)
     plt.show()
+    plt.cla()
