@@ -82,18 +82,27 @@ class BPNN():
         return output
 
 
-    def softmax_loss(self, y, p):
+    def softmax_loss(self, y, p, normalize):
         # input:
         #   y:  图片标签        (batch_size x 1)
         #   p:  预测概率        (batch_size x 10(或者class_num))
+        #   normalize: 正则化项 dict
+        #       type: 可选 ['none','L1','L2']
+        #       reg:  正则化系数
         # output:
         #   avg_loss: 每batch的平均loss     float64
         loss = 0.0
         batch_size = y.shape[0]
         for i, yi in enumerate(y):
             loss -= np.log(p[i][yi])
-        avg_loss = loss / batch_size
-        return avg_loss
+        loss = loss / batch_size
+        if normalize["type"] == 'L1':
+            for i, w in enumerate(self.w):
+                loss += normalize["reg"] * (np.sum(np.abs(w)) + np.sum(np.abs(self.b[i])))
+        elif normalize["type"] == 'L2':
+            for i, w in enumerate(self.w):
+                loss += normalize["reg"] / 2 * (np.sum(w * w) + np.sum(self.b[i] * self.b[i]))
+        return loss
 
 
     def get_acc_avg(self, y, p):
@@ -118,7 +127,7 @@ class BPNN():
         return p
 
 
-    def train(self, X, y, epoch=10 , lr=0.01, batch_size=3):
+    def train(self, X, y, epoch=10 , lr=0.01, batch_size=3, normalize={"type":'none'}):
         # 训练网络
         # input:
         #   X:  训练图片
@@ -126,6 +135,9 @@ class BPNN():
         #   epoch:  训练次数
         #   lr: 训练速率
         #   batch_size: mini batch 大小 (最好能整除 X 的张数)
+        #   normalize: 正则化项 dict
+        #       type: 可选 ['none','L1','L2']
+        #       reg:  正则化系数
         # output:
         #   loss_list、acc_list
         #   横坐标为epoch
@@ -138,8 +150,8 @@ class BPNN():
                 x_batch = X[batch*batch_size:(batch+1)*batch_size]
                 y_batch = y[batch*batch_size:(batch+1)*batch_size]
                 p = self.forward(x_batch)
-                self.optimize(x_batch, y_batch, p, lr)
-                loss_sum += self.softmax_loss(y_batch, p)
+                self.optimize(x_batch, y_batch, p, lr, normalize)
+                loss_sum += self.softmax_loss(y_batch, p, normalize)
                 acc_sum += self.get_acc_avg(y_batch, p)
             loss_list.append(loss_sum / batch_num)
             acc_list.append(acc_sum / batch_num)
@@ -147,22 +159,29 @@ class BPNN():
         return loss_list, acc_list
 
 
-    def optimize(self, X, y, p, lr=0.01):
+    def optimize(self, X, y, p, lr, normalize):
         # input:
         #   X: 图片数据集矩阵  (batch_size x 3072)
         #   y: 图片标签    (batch_size x 1)
         #   p: 预测概率       (batch_size x 10(或者 class_num))
-        d_w, d_b = self.evaluate_analytic_grad(X, y, p)
+        #   lr: 训练速率
+        #   normalize: 正则化项 dict
+        #       type: 可选 ['none','L1','L2']
+        #       reg:  正则化系数
+        d_w, d_b = self.evaluate_analytic_grad(X, y, p, normalize)
         for i in range(self.layer_num):
             self.w[i] -= lr * d_w[i]
             self.b[i] -= lr * d_b[i]
 
 
-    def evaluate_analytic_grad(self, X, y, p):
+    def evaluate_analytic_grad(self, X, y, p, normalize):
         # input:
         #   X: 图片数据集矩阵  (batch_size x 3072)
         #   y: 图片标签    (batch_size x 1)
         #   p: 预测概率       (batch_size x 10(或者 class_num))
+        #   normalize: 正则化项 dict
+        #       type: 可选 ['none','L1','L2']
+        #       reg:  正则化系数
         batch_size = X.shape[0]
         Y = np.zeros(p.shape)
         for i, label in enumerate(y):
@@ -176,7 +195,15 @@ class BPNN():
             delta = np.dot(delta, self.w[i].T) * self.act_func_dir[i-1]["f'"](self.layers[i-1])
         d_w[0] = np.dot(X.T, delta) / batch_size
         d_b[0] = delta.sum(0) / batch_size
-
+   
+        if normalize["type"] == 'L1':
+            for i, w in enumerate(self.w):
+                d_w[i] += normalize["reg"] * np.sign(w)
+                d_b[i] += normalize["reg"] * np.sign(self.b[i])
+        elif normalize["type"] == 'L2':
+            for i, w in enumerate(self.w):
+                d_w[i] += normalize["reg"] * w
+                d_b[i] += normalize["reg"] * self.b[i]
         return d_w, d_b
 
     def evaluate_numerical_gradient(self, X, y, p):
