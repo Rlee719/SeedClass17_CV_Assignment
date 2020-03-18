@@ -7,9 +7,21 @@ import plot
 if __name__ == "__main__":
     X, y = sc.generate_data()
 
-    # classifier = bpnn.BPNN([[2,3,3,2],[bpnn.tanh,bpnn.tanh,bpnn.unact]])
-    # train_loss_list, train_acc_list = classifier.train(X, y, lr=1, epoch=50, batch_size=20)
-    # plot.draw_plot(list(range(len(train_acc_list))), train_acc_list, "acc", 'epoch', 'acc', "acc.png")
+    classifier = bpnn.BPNN([[2,3,3,2],[bpnn.tanh,bpnn.tanh,bpnn.unact]])
+    optimizer = bpnn.Optimizer(classifier)
+    
+    optimizer.lr = 1
+    optimizer.lr_decay = bpnn.Learning_rate_decay.inv
+    optimizer.lr_k = 0.1
+    optimizer.momentum_type = bpnn.Momentum.Adagrad
+    optimizer.mu = 0.9
+    optimizer.reg_type = bpnn.Regularization.L1
+    optimizer.reg = 0.005
+
+    classifier.useOpt(optimizer)
+
+    train_loss_list, train_acc_list = classifier.train(X, y, epoch=10,batch_size=20)
+    plot.draw_plot(list(range(len(train_acc_list))), train_acc_list, "acc", 'epoch', 'acc', "acc.png")
 
     # xs, acc_list, labels = [], [], []
     # for i in range(5):
@@ -31,14 +43,14 @@ if __name__ == "__main__":
     #         z[i].append(train_acc_list[-1])
     # plot.draw_plot_3d(layer1nodes, lrs, z, "acc", "layer1 node", "lr", "acc", "acc.png")
 
-    normallist = ['none', 'L1', 'L2']
-    reg = [0.00001,0.00005,0.0001,0.0005,0.001]
-    z = []
-    for i,t in enumerate(normallist):
-        z.append([])
-        for r in reg:
-            classifier = bpnn.BPNN([[2,3,3,2],[bpnn.tanh,bpnn.tanh,bpnn.tanh,bpnn.unact]])
-            train_loss_list, train_acc_list = classifier.train(X, y, lr=1, epoch=50, batch_size=20, normalize={"type":t, "reg":r})
-            z[i].append(train_acc_list[-1])
-    plot.draw_plot_3d([0,1,2], reg, z, "acc", "type", "reg", "acc", "acc.png")
+    # normallist = ['none', 'L1', 'L2']
+    # reg = [0.00001,0.00005,0.0001,0.0005,0.001]
+    # z = []
+    # for i,t in enumerate(normallist):
+    #     z.append([])
+    #     for r in reg:
+    #         classifier = bpnn.BPNN([[2,3,3,2],[bpnn.tanh,bpnn.tanh,bpnn.tanh,bpnn.unact]])
+    #         train_loss_list, train_acc_list = classifier.train(X, y, lr=1, epoch=50, batch_size=20, normalize={"type":t, "reg":r})
+    #         z[i].append(train_acc_list[-1])
+    # plot.draw_plot_3d([0,1,2], reg, z, "acc", "type", "reg", "acc", "acc.png")
 

@@ -26,9 +26,14 @@ if __name__ == "__main__":
     X_test = np.reshape(X_test, (X_test.shape[0], -1))
 
     classifier = bpnn.BPNN([[3072,20,10],[bpnn.relu,bpnn.relu,bpnn.relu]])
+    optimizer = bpnn.Optimizer(classifier)
+    
+    optimizer.lr = 0.1
+
+    classifier.useOpt(optimizer)
 
     print("Doing: train net")
-    train_loss_list, train_acc_list = classifier.train(X_train, y_train,lr=0.1,epoch=20, batch_size=10)
+    train_loss_list, train_acc_list = classifier.train(X_train, y_train,epoch=20, batch_size=10)
 
     print(train_loss_list)
     print("Doing: test net")
