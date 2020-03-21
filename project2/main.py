@@ -231,10 +231,10 @@ if __name__ == "__main__":
     X_train, X_test = img_data_normalize(X_train, X_test)
     #sys.exit()
     # print("Doing: set net size parameter")
-    # softmax_classifier = softmax([3072,10])
+    softmax_classifier = softmax([3072,10])
 
     # print("Doing: train net")
-    softmax_classifier.train(X_train, y_train, batch_size=32, epoch=2, lr=0.005, reg=0.00002, normalize_type='none')
+    softmax_classifier.train(X_train, y_train, batch_size=2, epoch=2, lr=0.005, reg=0.00002, normalize_type='none')
     softmax_classifier.evaluate(X_test, y_test)
     ## 画图
     #three_loss_plot()
