@@ -4,45 +4,12 @@ import bpnn
 import data_utils
 import random
 import optimizer
+import loss
 
 def shuffle(x, y):
     random_arr = [i for i in range(len(x))]
     random.shuffle(random_arr)
     return x[random_arr], y[random_arr]
-class Loss():
-    def __init__(self):
-        pass
-
-    @classmethod
-    def softmax_loss(cls, y, p):
-        # input:
-        #   y:  图片标签        (batch_size x 1)
-        #   p:  预测概率        (batch_size x 10(或者class_num))
-        # output:
-        #   avg_loss: 每batch的平均loss     float64
-        loss = 0.0
-        batch_size = y.shape[0]
-        for i, yi in enumerate(y):
-            loss -= np.log(p[i][yi])
-        loss = loss / batch_size
-        return loss
-
-    @classmethod
-    def L1_loss(cls, get_params, reg):
-        #if self.optimizer.reg_type == Regularization.L1:
-        loss = 0.0
-        for i, param in get_params():
-            print(type(param["value"]))
-            loss += reg * (np.sum(np.abs(param["value"])))
-        return loss
-
-    @classmethod
-    def L2_loss(cls, get_params, reg):
-        #if self.optimizer.reg_type == Regularization.L2:
-        loss = 0.0
-        for i, param in get_params():
-            loss += reg / 2 * (np.sum(param["value"] * param["value"]))
-        return loss
 
 def get_acc_avg(y, p):
     # input:
@@ -64,7 +31,9 @@ def train(classifier, X, y, epoch=10, batch_size=3, reg=1e-3):
     #   loss_list、acc_list
     #   横坐标为epoch
     loss_list, acc_list = [], []
-    _optimizer = optimizer.SGD(classifier.raise_params)
+    #print(len(classifier.raise_params()))
+    loss_func = loss.Loss_Sequential(loss.soft_max_loss(), loss.L1_loss())
+    _optimizer = optimizer.MB_SGD(classifier.layers, loss_func)
     batch_num = X.shape[0] // batch_size
     for e in range(epoch):
         X, y = shuffle(X, y)
@@ -73,8 +42,8 @@ def train(classifier, X, y, epoch=10, batch_size=3, reg=1e-3):
             x_batch = X[batch*batch_size:(batch+1)*batch_size]
             y_batch = y[batch*batch_size:(batch+1)*batch_size]
             p = classifier.forward(x_batch)
-            loss_sum += Loss.softmax_loss(y_batch, p) + Loss.L1_loss(classifier.raise_params, reg)
-            #_optimizer.optimize(x_batch, y_batch, p)       
+            loss_sum += loss.softmax_loss(y_batch, p) + loss.L1_loss(classifier.layers, reg)
+            _optimizer.optimize(x_batch, y_batch, p)       
             acc_sum += get_acc_avg(y_batch, p)
         loss_list.append(loss_sum / batch_num)
         acc_list.append(acc_sum / batch_num)
