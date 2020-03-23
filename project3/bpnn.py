@@ -52,8 +52,8 @@ class BPNN(Module):
 if __name__ == "__main__":
     model = BPNN(model_config=[3072,20,10], act_func="relu")
     loss_func = loss.Loss_Sequential(loss.soft_max_loss(), loss.L2_loss(model.layers, 1))
-    input = np.zeros((1, 3072))
-    y = np.zeros((1,), dtype=int)
+    input = np.zeros((16, 3072))
+    y = np.zeros((16,), dtype=int)
     output = model(input)
     _optimizer = optimizer.MB_SGD(layers=model.layers, loss=loss_func)
     loss = loss_func(y, output)

@@ -74,7 +74,7 @@ class relu(Activation):
         return self.y
 
     def backward(self, upstream_grad):
-        self.grad = np.where(self.y < 0, 0, 1)
+        self.grad = np.where(self.y < 0, 0, 1).mean(0)
         self.grad = np.multiply(self.grad, upstream_grad)
         return self.grad.reshape(-1)
 
