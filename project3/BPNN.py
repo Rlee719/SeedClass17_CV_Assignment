@@ -236,19 +236,19 @@ class Optimizer():
 
         elif self.momentum_type == Momentum.Momentum:
             for i in range(self.classifier.layer_num):
-                d_w[i] = self.cache_dvw[i] * self.momentum_mu - self.lr * d_w[i]
-                d_b[i] = self.cache_dvb[i] * self.momentum_mu - self.lr * d_b[i]
+                d_w[i] = self.cache_dvw[i] * self.mu - self.lr * d_w[i]
+                d_b[i] = self.cache_dvb[i] * self.mu - self.lr * d_b[i]
                 self.cache_dvw[i] = d_w[i].copy()
                 self.cache_dvb[i] = d_b[i].copy()
 
         elif self.momentum_type == Momentum.Nesterov:
             for i in range(self.classifier.layer_num):
-                v = self.cache_dvw[i] * self.momentum_mu - self.lr * d_w[i]
-                d_w[i] = self.momentum_mu * v - self.lr * d_w[i]
+                v = self.cache_dvw[i] * self.mu - self.lr * d_w[i]
+                d_w[i] = self.mu * v - self.lr * d_w[i]
                 self.cache_dvw[i] = v.copy()
 
-                v = self.cache_dvb[i] * self.momentum_mu - self.lr * d_b[i]
-                d_b[i] = self.momentum_mu * v - self.lr * d_b[i]
+                v = self.cache_dvb[i] * self.mu - self.lr * d_b[i]
+                d_b[i] = self.mu * v - self.lr * d_b[i]
                 self.cache_dvb[i] = v.copy()
 
         elif self.momentum_type == Momentum.Adagrad:
@@ -260,9 +260,9 @@ class Optimizer():
 
         elif self.momentum_type == Momentum.RMSprop:
             for i in range(self.classifier.layer_num):
-                self.cache_dvw[i] += self.momentum_mu * self.cache_dvw[i] + (1 - self.momentum_mu) * d_w[i] ** 2
+                self.cache_dvw[i] += self.mu * self.cache_dvw[i] + (1 - self.mu) * d_w[i] ** 2
                 d_w[i] = - self.lr * d_w[i] / (np.sqrt(self.cache_dvw[i]) + 1e-7)
-                self.cache_dvb[i] += self.momentum_mu * self.cache_dvb[i] + (1 - self.momentum_mu) * d_b[i] ** 2
+                self.cache_dvb[i] += self.mu * self.cache_dvb[i] + (1 - self.mu) * d_b[i] ** 2
                 d_b[i] = - self.lr * d_b[i] / (np.sqrt(self.cache_dvb[i]) + 1e-7)
 
         for i in range(self.classifier.layer_num):

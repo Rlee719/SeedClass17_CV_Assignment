@@ -23,6 +23,8 @@ if __name__ == "__main__":
     train_loss_list, train_acc_list = classifier.train(X, y, epoch=10,batch_size=20)
     plot.draw_plot(list(range(len(train_acc_list))), train_acc_list, "acc", 'epoch', 'acc', "acc.png")
 
+    sc.visualize(X, y , classifier)
+
     # xs, acc_list, labels = [], [], []
     # for i in range(5):
     #     classifier = bpnn.BPNN([[2,3 + i,3,2],[bpnn.tanh,bpnn.tanh,bpnn.unact]])
