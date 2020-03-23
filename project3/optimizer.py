@@ -1,11 +1,13 @@
 import numpy as np
+from layers import *
 from module import Optimizer
 from collections import Iterable
 from enum import IntEnum
 
 class MB_SGD(Optimizer):
-    def __init__(self, **input):
+    def __init__(self, lr=1e-5, **input):
         super().__init__(**input)
+        self.lr = lr
         self.lr_k = 0
         self.lr_decay = Learning_rate_decay.none
         self.reg_type = Regularization.none
@@ -19,10 +21,17 @@ class MB_SGD(Optimizer):
         for i, layer in enumerate(reversed(self.layers)):
             upstream_gradient = layer.backward(upstream_gradient)
             #print(upstream_gradient.shape, type(layer))
-            
+
+            #print(type(layer), "layer")
+            #local_grad = layer.local_grad(upstream_gradient) * self.lr
+            #print(local_grad, "lg")
+            #layer.optimize(*local_grad)
             try:
-                local_grad = layer.local_grad(upstream_gradient) * self.lr
-                layer.optimize(local_grad)
+                local_grad = layer.local_grad(upstream_gradient) 
+                param_list = []
+                for i in range(len(local_grad)):
+                    param_list.append(local_grad[i]*self.lr)
+                layer.optimize(*local_grad)
             except:
                 pass
         self.update_lr_decay()

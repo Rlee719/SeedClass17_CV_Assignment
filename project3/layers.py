@@ -42,6 +42,7 @@ class fc(Layer):
         return self.d_w, self.d_b
 
     def optimize(self, *input):
+        #print("FC Layers, need to optimize")
         self.d_w, self.d_b = input
         self.weight -= self.d_w
         self.bias -= self.d_b
@@ -105,7 +106,8 @@ class batch_norm1d(Layer):
         return self.dgamma, self.dbeta
 
     def optimize(self, *input):
-        dgamma, dbeta = input
+        #print("BN Layers, need to optimize")
+        dgamma, dbeta = input[0], input[1]
         self.y -= dgamma
         self.b -= dbeta
 

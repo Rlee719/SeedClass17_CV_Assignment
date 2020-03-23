@@ -42,10 +42,11 @@ class Layer(object):
         pass
 
     def optimize(self, *input):
-        pass
+        raise NotImplementedError
 
     def local_grad(self, *input):
-        pass
+        #print("Layers dont need to optimize")
+        raise NotImplementedError
 
 class Activation(Layer):
     def __init__(self):

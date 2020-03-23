@@ -51,13 +51,15 @@ class BPNN(Module):
         return p.argmax(1)
 
 if __name__ == "__main__":
-    model = BPNN(model_config=[2,3,2], act_func="relu")
-    loss_func = loss.Loss_Sequential(loss.soft_max_loss(), loss.L2_loss(model.layers, 1))
-    input = np.zeros((16, 2))
-    y = np.zeros((16,), dtype=int)
-    _optimizer = optimizer.MB_SGD(layers=model.layers, loss=loss_func)
-    for i in range(10):
+    model = BPNN(model_config=[10,100,2], act_func="relu")
+    #loss_func = loss.Loss_Sequential(loss.soft_max_loss(), loss.L2_loss(model.layers, 1))
+    loss_func = loss.Loss_Sequential(loss.soft_max_loss())
+    input = np.zeros((64, 10))
+    y = np.random.randint(low=0, high=1, size=(64,))
+    _optimizer = optimizer.MB_SGD(layers=model.layers, loss=loss_func, lr=1e-1)
+    for i in range(20):
         output = model(input)
         _optimizer.zero_grad()
         loss = loss_func(y, output)
-        _optimizer.optimize()    
+        print(loss)
+        _optimizer.optimize()

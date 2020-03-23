@@ -54,6 +54,7 @@ class L2_loss(Regularization_loss):
         for layer in self.layers:
             if type(layer) is layers.fc:
                 self.loss += self.reg / 2 * (np.sum(layer.weight * layer.weight) + np.sum(layer.bias * layer.bias))
+        #print(self.loss, "L2_loss")
         return self.loss
 
     def backward(self, *inputs):
@@ -76,9 +77,13 @@ class Loss_Sequential(Loss):
         return self.loss
 
     def backward(self, *input): 
+        dp = 0
         for loss in self.adapted_loss:
             try: 
                 dp += loss.backward()
             except:
                 dp = loss.backward()
-        return dp.mean(0)
+        try:
+            return dp.mean(0)
+        except AttributeError:
+            return dp
