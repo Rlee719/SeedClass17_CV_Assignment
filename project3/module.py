@@ -38,6 +38,9 @@ class Layer(object):
         #Note that upstream_grad and local_grad should be batch gradient!!!
         raise NotImplementedError
 
+    def init_grad(self):
+        pass
+
     def optimize(self, *input):
         pass
 
@@ -75,6 +78,10 @@ class Optimizer():
         #     if type(layer) is fc:
         #         self.cache_dvw.append(np.zeros(layer.weight.shape))
         #         self.cache_dvb.append(np.zeros(layer.bias.shape))
+
+    def zero_grad(self):
+        for i, layer in enumerate(self.layers):
+            layer.init_grad()
 
     def update_lr_decay(self):
         if self.lr_decay == Learning_rate_decay.step:

@@ -16,7 +16,6 @@ class soft_max_loss(Loss):
         self.loss = 0.0
         self.y, self.probs = input
         batch_size = self.y.shape[0]
-        print()
         for i, yi in enumerate(self.y):
             self.loss -= np.log(self.probs[i][yi])
         self.loss = self.loss / batch_size
@@ -60,6 +59,7 @@ class L2_loss(Regularization_loss):
     def backward(self, *inputs):
         for layer in self.layers:
             if type(layer) is layers.fc:
+                #print(layer.weight.shape, "weight")
                 layer.d_w += self.reg * layer.weight
                 layer.d_b += self.reg * layer.bias
         return 0

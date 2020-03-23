@@ -28,6 +28,7 @@ class BPNN(Module):
                 _layer = layer
             else:
                 self.layers.append(layers.fc(_layer, layer))
+                self.layers.append(layers.batch_norm1d(layer))
                 self.layers.append(getattr(layers, self.act_func)())
                 _layer = layer
         self.layers.append(layers.softmax())
@@ -50,11 +51,13 @@ class BPNN(Module):
         return p.argmax(1)
 
 if __name__ == "__main__":
-    model = BPNN(model_config=[3072,20,10], act_func="relu")
+    model = BPNN(model_config=[2,3,2], act_func="relu")
     loss_func = loss.Loss_Sequential(loss.soft_max_loss(), loss.L2_loss(model.layers, 1))
-    input = np.zeros((16, 3072))
+    input = np.zeros((16, 2))
     y = np.zeros((16,), dtype=int)
-    output = model(input)
     _optimizer = optimizer.MB_SGD(layers=model.layers, loss=loss_func)
-    loss = loss_func(y, output)
-    _optimizer.optimize()    
+    for i in range(10):
+        output = model(input)
+        _optimizer.zero_grad()
+        loss = loss_func(y, output)
+        _optimizer.optimize()    

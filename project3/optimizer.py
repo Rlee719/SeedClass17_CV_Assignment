@@ -15,9 +15,10 @@ class MB_SGD(Optimizer):
 
     def optimize(self):
         upstream_gradient = np.array(self.loss_func.backward())
+        #print("optimize!")
         for i, layer in enumerate(reversed(self.layers)):
             upstream_gradient = layer.backward(upstream_gradient)
-            print(upstream_gradient.shape, type(layer))
+            #print(upstream_gradient.shape, type(layer))
             
             try:
                 local_grad = layer.local_grad(upstream_gradient) * self.lr
