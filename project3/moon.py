@@ -7,7 +7,7 @@ import plot
 if __name__ == "__main__":
     X, y = sc.generate_data()
 
-    classifier = bpnn.BPNN([[2,3,3,2],[bpnn.tanh,bpnn.tanh,bpnn.unact]])
+    classifier = bpnn.BPNN([[2,3,3,2],[bpnn.tanh,bpnn.tanh,bpnn.unact]], 'xavier')
     optimizer = bpnn.Optimizer(classifier)
     
     optimizer.lr = 1
@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     classifier.useOpt(optimizer)
 
-    train_loss_list, train_acc_list = classifier.train(X, y, epoch=10,batch_size=20)
+    train_loss_list, train_acc_list = classifier.train(X, y, epoch=50,batch_size=20)
     plot.draw_plot(list(range(len(train_acc_list))), train_acc_list, "acc", 'epoch', 'acc', "acc.png")
 
     sc.visualize(X, y , classifier)

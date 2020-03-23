@@ -43,7 +43,7 @@ relu = {"f":_relu, "f'":_relu_derivative}
 sigmoid = {"f":_sigmoid, "f'":_sigmoid_derivative}
 
 class BPNN():
-    def __init__(self, model_config):
+    def __init__(self, model_config, init_type='none'):
         # input:
         #   model_config: [[input.length, layer1.length, layer2.length, ..., output_class_num],
         #                              [act_func1,  act_func2,       ..., act_funcN],
@@ -53,17 +53,25 @@ class BPNN():
         self.layers, self.w, self.b = [], [], []
         self.act_func_dir = []
         self.layer_num = 0
-        self.init_model()
+        self.init_model(init_type)
 
-    def init_model(self):
+    def init_model(self, init_type):
         # 初始化 W 和 b 为 0
         for i, layer in enumerate(self.model_config[0]):
             if i == 0:
                 continue
             else:
+                print(np.sqrt(self.model_config[0][i - 1] / 2))
                 self.layers.append(np.zeros(layer))
-                self.w.append(np.random.rand(self.model_config[0][i-1], layer))
-                self.b.append(np.random.rand(layer))
+                if init_type == 'none':
+                    self.w.append(np.random.randn(self.model_config[0][i-1], layer))
+                    self.b.append(np.random.randn(layer))
+                elif init_type == 'xavier':
+                    self.w.append(np.random.randn(self.model_config[0][i-1], layer) / np.sqrt(self.model_config[0][i - 1]))
+                    self.b.append(np.random.randn(layer) / np.sqrt(self.model_config[0][i - 1]))
+                elif init_type == 'he':
+                    self.w.append(np.random.randn(self.model_config[0][i-1], layer) / np.sqrt(self.model_config[0][i - 1] / 2))
+                    self.b.append(np.random.randn(layer) / np.sqrt(self.model_config[0][i - 1] / 2))
                 # 不能初始化为0，否则梯度永远是0
                 # self.w.append(np.ones((self.model_config[0][i-1], layer)))
                 # self.b.append(np.ones((layer)))
