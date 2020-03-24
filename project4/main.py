@@ -68,27 +68,40 @@ if __name__ == "__main__":
     print("Doing: load npy files")
     X_train, X_test, y_train, y_test = data_utils.load_npy("../")
 
-    X_train = X_train[0:1000]
-    y_train = y_train[0:1000]
+    X_train = X_train[0:10000]
+    y_train = y_train[0:10000]
 
     # 将单幅图片转成 3072 维的向量
     print("Doing: image data reshape")
     X_train = np.reshape(X_train, (X_train.shape[0], -1))
     X_test = np.reshape(X_test, (X_test.shape[0], -1))
 
-    classifier = bpnn.BPNN(model_config=[3072,20,10], act_func="_relu")
-    #optimizer = bpnn.Optimizer(classifier)
-    
-    #optimizer.lr = 0.1
 
-    #classifier.useOpt(optimizer)
-    classifier.set_train()
-    print("Doing: train net")
-    train_loss_list, train_acc_list = train(classifier, X_train, y_train, epoch=20, batch_size=10)
+    models = [
+                [[3072,190,10],[bpnn.relu,bpnn.relu,bpnn.relu,bpnn.relu]],
+            ]
+    lrs = [1.0]
+    for m in models:
+        for lr in lrs:
+            classifier = bpnn.BPNN(m, 'he')
+            optimizer = bpnn.Optimizer(classifier)
+            
+            optimizer.lr = lr
+            optimizer.lr_decay = bpnn.Learning_rate_decay.exp
+            optimizer.lr_k = 0.1
+            optimizer.reg_type = bpnn.Regularization.L2
+            optimizer.momentum_type = bpnn.Momentum.Momentum
+            optimizer.mu = 0.8
+            optimizer.reg = 0
 
-    #print(train_loss_list)
-    print("Doing: test net")
-    classifier.set_eval()
-    test_acc = evaluate(classifier, X_test, y_test)
+            classifier.useOpt(optimizer)
 
-    print("test accuracy is %f" % (test_acc))
+            print("Doing: train net")
+            train_loss_list, train_acc_list = classifier.train(X_train, y_train,epoch=30, batch_size=200)
+            print(train_loss_list[-1], train_acc_list[-1])
+
+    # print(train_loss_list)
+    # print("Doing: test net")
+    # test_acc = classifier.evaluate(X_test, y_test)
+
+    # print("test accuracy is %f" % (test_acc))

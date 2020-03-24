@@ -61,7 +61,6 @@ class BPNN():
             if i == 0:
                 continue
             else:
-                print(np.sqrt(self.model_config[0][i - 1] / 2))
                 self.layers.append(np.zeros(layer))
                 if init_type == 'none':
                     self.w.append(np.random.randn(self.model_config[0][i-1], layer))
@@ -137,7 +136,8 @@ class BPNN():
         a = X
         for i in range(self.layer_num):
             self.layers[i] = np.dot(a, self.w[i]) + self.b[i]
-            a = self.layers[i] = self.act_func_dir[i]["f"](self.layers[i])
+            self.layers[i] = self.act_func_dir[i]["f"](self.layers[i])
+            a = self.layers[i] = (self.layers[i] - np.mean(self.layers[i],axis=1,keepdims=True)) / (np.std(self.layers[i],axis=1,keepdims=True) + 1e-7)
         p = self.softmax(self.layers[-1])
         return p
 
