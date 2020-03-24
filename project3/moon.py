@@ -7,20 +7,20 @@ import plot
 if __name__ == "__main__":
     X, y = sc.generate_data()
 
-    classifier = bpnn.BPNN([[2,3,3,2],[bpnn.tanh,bpnn.tanh,bpnn.unact]], 'xavier')
+    classifier = bpnn.BPNN([[2,3,3,2],[bpnn.tanh,bpnn.tanh,bpnn.tanh]], 'none')
     optimizer = bpnn.Optimizer(classifier)
     
     optimizer.lr = 1
-    optimizer.lr_decay = bpnn.Learning_rate_decay.inv
+    optimizer.lr_decay = bpnn.Learning_rate_decay.none
     optimizer.lr_k = 0.1
-    optimizer.momentum_type = bpnn.Momentum.Adagrad
+    optimizer.momentum_type = bpnn.Momentum.none
     optimizer.mu = 0.9
-    optimizer.reg_type = bpnn.Regularization.L1
-    optimizer.reg = 0.005
+    optimizer.reg_type = bpnn.Regularization.none
+    optimizer.reg = 1e-2
 
     classifier.useOpt(optimizer)
 
-    train_loss_list, train_acc_list = classifier.train(X, y, epoch=50,batch_size=20)
+    train_loss_list, train_acc_list = classifier.train(X, y, epoch=100,batch_size=50)
     plot.draw_plot(list(range(len(train_acc_list))), train_acc_list, "acc", 'epoch', 'acc', "acc.png")
 
     sc.visualize(X, y , classifier)
