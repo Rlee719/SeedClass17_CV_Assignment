@@ -136,8 +136,8 @@ class BPNN():
         a = X
         for i in range(self.layer_num):
             self.layers[i] = np.dot(a, self.w[i]) + self.b[i]
-            self.layers[i] = self.act_func_dir[i]["f"](self.layers[i])
-            a = self.layers[i] = (self.layers[i] - np.mean(self.layers[i],axis=1,keepdims=True)) / (np.std(self.layers[i],axis=1,keepdims=True) + 1e-7)
+            a = self.layers[i] = self.act_func_dir[i]["f"](self.layers[i])
+            # a = self.layers[i] = (self.layers[i] - np.mean(self.layers[i],axis=1,keepdims=True)) / (np.std(self.layers[i],axis=1,keepdims=True) + 1e-7)
         p = self.softmax(self.layers[-1])
         return p
 
@@ -157,7 +157,7 @@ class BPNN():
 
         batch_num = X.shape[0] // batch_size
         for e in range(epoch):
-            X, y = self.shuffle(X, y)
+            # X, y = self.shuffle(X, y)
             acc_sum, loss_sum = 0, 0
             for batch in range(batch_num):
                 x_batch = X[batch*batch_size:(batch+1)*batch_size]
@@ -168,6 +168,8 @@ class BPNN():
                 acc_sum += self.get_acc_avg(y_batch, p)
             loss_list.append(loss_sum / batch_num)
             acc_list.append(acc_sum / batch_num)
+
+            print("loss:", loss_list[-1], "acc:", acc_list[-1])
 
         return loss_list, acc_list
 
@@ -268,9 +270,9 @@ class Optimizer():
 
         elif self.momentum_type == Momentum.RMSprop:
             for i in range(self.classifier.layer_num):
-                self.cache_dvw[i] += self.mu * self.cache_dvw[i] + (1 - self.mu) * d_w[i] ** 2
+                self.cache_dvw[i] += self.mu * self.cache_dvw[i] + (1 - self.mu) * (d_w[i] ** 2)
                 d_w[i] = - self.lr * d_w[i] / (np.sqrt(self.cache_dvw[i]) + 1e-7)
-                self.cache_dvb[i] += self.mu * self.cache_dvb[i] + (1 - self.mu) * d_b[i] ** 2
+                self.cache_dvb[i] += self.mu * self.cache_dvb[i] + (1 - self.mu) * (d_b[i] ** 2)
                 d_b[i] = - self.lr * d_b[i] / (np.sqrt(self.cache_dvb[i]) + 1e-7)
 
         for i in range(self.classifier.layer_num):

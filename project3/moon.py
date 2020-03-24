@@ -16,11 +16,11 @@ if __name__ == "__main__":
     optimizer.momentum_type = bpnn.Momentum.none
     optimizer.mu = 0.9
     optimizer.reg_type = bpnn.Regularization.none
-    optimizer.reg = 1e-2
+    optimizer.reg = 0.005
 
     classifier.useOpt(optimizer)
 
-    train_loss_list, train_acc_list = classifier.train(X, y, epoch=100,batch_size=50)
+    train_loss_list, train_acc_list = classifier.train(X, y, epoch=79,batch_size=50)
     plot.draw_plot(list(range(len(train_acc_list))), train_acc_list, "acc", 'epoch', 'acc', "acc.png")
 
     sc.visualize(X, y , classifier)
